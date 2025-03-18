@@ -67,7 +67,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1">
+        <nav className="hidden md:flex items-center space-x-1 absolute left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-xl px-6 rounded-[15%] transition-all duration-500" style={{ opacity: activeSection === 'about' ? 1 : 0, transform: `translate(-50%, ${activeSection === 'about' ? '0' : '-20px'})` }}>
           {navLinks.map((link) => (
             <Link
               key={link.name}
