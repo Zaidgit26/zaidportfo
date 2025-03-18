@@ -100,6 +100,7 @@ export function Navbar() {
           <Button
             size="sm"
             className="ml-4 bg-gradient-to-r from-primary/80 to-blue-500/80 hover:from-primary hover:to-blue-500 text-white neo-glow group transition-all duration-300 border-none rounded-lg"
+            onClick={() => window.open("https://drive.google.com/file/d/1Hojq4Hx1jY4n0GnkjFnmm8lQWNXj2Coy/view", "_blank")}
           >
             <FileText size={14} className="mr-1" />
             Resume
