@@ -11,14 +11,21 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState("home")
+  const [showNav, setShowNav] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
+      const scrollPosition = window.scrollY + 100
+      const aboutSection = document.getElementById('about')
+      
+      if (aboutSection) {
+        setShowNav(window.scrollY >= aboutSection.offsetTop - 100)
+      }
+      
       setScrolled(window.scrollY > 10)
       
       // Update active section based on scroll position
       const sections = document.querySelectorAll("section[id]")
-      const scrollPosition = window.scrollY + 100
       
       sections.forEach((section) => {
         const sectionTop = (section as HTMLElement).offsetTop
@@ -52,6 +59,7 @@ export function Navbar() {
     <header
       className={cn(
         "fixed top-0 w-full z-50 transition-all duration-500",
+        showNav ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full",
         scrolled 
           ? "bg-black/40 backdrop-blur-xl border-b border-white/10 py-3" 
           : "bg-transparent py-5",
@@ -67,13 +75,13 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1 absolute left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-xl px-6 rounded-[15%] transition-all duration-500" style={{ opacity: activeSection === 'about' ? 1 : 0, transform: `translate(-50%, ${activeSection === 'about' ? '0' : '-20px'})` }}>
+        <nav className="hidden md:flex items-center space-x-4 mx-auto">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
               className={cn(
-                "px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 relative group",
+                "px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 relative group hover:bg-primary/10",
                 activeSection === link.href.substring(1) 
                   ? "text-primary" 
                   : "text-white/70 hover:text-white"
@@ -82,7 +90,7 @@ export function Navbar() {
               {activeSection === link.href.substring(1) && (
                 <motion.span 
                   layoutId="navbar-active-pill"
-                  className="absolute inset-0 bg-primary/10 rounded-md -z-10"
+                  className="absolute inset-0 bg-primary/10 rounded-lg -z-10"
                   transition={{ type: "spring", duration: 0.6 }}
                 />
               )}
@@ -91,7 +99,7 @@ export function Navbar() {
           ))}
           <Button
             size="sm"
-            className="ml-2 bg-gradient-to-r from-primary/80 to-blue-500/80 hover:from-primary hover:to-blue-500 text-white neo-glow group transition-all duration-300 border-none"
+            className="ml-4 bg-gradient-to-r from-primary/80 to-blue-500/80 hover:from-primary hover:to-blue-500 text-white neo-glow group transition-all duration-300 border-none rounded-lg"
           >
             <FileText size={14} className="mr-1" />
             Resume

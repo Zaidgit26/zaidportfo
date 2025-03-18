@@ -130,7 +130,7 @@ export function ParticleBackground() {
 
     // Initialize
     resizeCanvas()
-    animate(performance.now())
+    animate()
 
     // Handle resize
     window.addEventListener("resize", resizeCanvas)
