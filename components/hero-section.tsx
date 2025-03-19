@@ -73,7 +73,7 @@ export function HeroSection() {
               <span className="sr-only">GitHub</span>
             </a>
             <a
-              href="https://linkedin.com/in/zaid-ahm"
+              href="https://in.linkedin.com/in/zaid-ahmed-s-33008023b"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-primary transition-colors neo-glow p-2 rounded-full"
