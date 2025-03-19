@@ -46,14 +46,21 @@ export function HeroSection() {
 
           <div className="flex flex-col sm:flex-row gap-4 mb-12 justify-center">
             <Button
-              size="lg"
-              className="bg-primary/20 border border-primary/50 hover:bg-primary/30 text-primary neo-glow"
-            >
-              View My Work
-            </Button>
-            <Button size="lg" variant="outline" className="border-white/20 hover:border-white/40 backdrop-blur-sm">
-              Contact Me
-            </Button>
+  size="lg"
+  className="bg-primary/20 border border-primary/50 hover:bg-primary/30 text-primary neo-glow"
+  onClick={() => document.getElementById("projects").scrollIntoView({ behavior: "smooth" })}
+>
+  View My Work
+</Button>
+
+<Button
+  size="lg"
+  variant="outline"
+  className="border-white/20 hover:border-white/40 backdrop-blur-sm"
+  onClick={() => window.location.href = "mailto:reachme.zaid@gmail.com"}
+>
+  Contact Me
+</Button>
           </div>
 
           <div className="flex space-x-6 mb-16 justify-center">
