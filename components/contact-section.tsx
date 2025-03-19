@@ -52,7 +52,7 @@ export function ContactSection() {
     {
       icon: <Mail className="w-10 h-10 text-primary" />,
       title: "Email",
-      value: "zaid@example.com",
+      value: "reachme.zaid@example.com",
       link: "mailto:reachme.zaid@gmail.com",
     },
     {
