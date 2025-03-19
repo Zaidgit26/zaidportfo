@@ -53,13 +53,13 @@ export function ContactSection() {
       icon: <Mail className="w-10 h-10 text-primary" />,
       title: "Email",
       value: "zaid@example.com",
-      link: "mailto:zaid@example.com",
+      link: "mailto:reachme.zaid@gmail.com",
     },
     {
       icon: <Phone className="w-10 h-10 text-primary" />,
       title: "Phone",
-      value: "+91 9876543210",
-      link: "tel:+919876543210",
+      value: "+91 7397006532",
+      link: "tel:+917397006532",
     },
     {
       icon: <MapPin className="w-10 h-10 text-primary" />,
