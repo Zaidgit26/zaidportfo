@@ -101,7 +101,7 @@ export function SkillsSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-3 neo-text bg-clip-text text-transparent bg-gradient-to-r from-white to-white/90">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 neo-text bg-clip-text text-transparent bg-gradient-to-r from-white to-white/90 font-space-grotesk">
             My Skills
           </h2>
           <div className="w-24 h-1.5 bg-gradient-to-r from-primary to-blue-500 mx-auto mb-6 neo-glow rounded-full"></div>
@@ -134,7 +134,7 @@ export function SkillsSection() {
                       >
                         {skill.icon}
                       </div>
-                      <h3 className="text-xl font-semibold mb-4 text-white group-hover:text-primary transition-colors duration-300">
+                      <h3 className="text-xl font-semibold mb-4 text-white group-hover:text-primary transition-colors duration-300 font-space-grotesk">
                         {skill.category}
                       </h3>
                       <div className="flex flex-wrap justify-center gap-2">
@@ -156,9 +156,7 @@ export function SkillsSection() {
         </motion.div>
       </div>
 
-      {/* Enhanced floating elements */}
-      <div className="absolute top-1/3 left-10 w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-blue-500/20 backdrop-blur-3xl floating-delay-3 opacity-30 hidden lg:block"></div>
-      <div className="absolute bottom-1/3 right-10 w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-3xl floating opacity-30 hidden lg:block"></div>
+      {/* Removed floating geometric shapes - galaxy background provides the cosmic effect */}
     </section>
   )
 }

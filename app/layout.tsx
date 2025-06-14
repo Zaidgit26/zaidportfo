@@ -1,16 +1,23 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Poppins } from "next/font/google"
+import { Poppins, Space_Grotesk } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { ParticleBackground } from "@/components/particle-background"
+import { BackgroundWrapper } from "@/components/background-wrapper"
+import { CosmicCursor } from "@/components/cosmic-cursor"
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-poppins",
+})
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
 })
 
 export const metadata: Metadata = {
@@ -26,13 +33,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className="dark">
-      <body className={`${poppins.variable} font-sans relative`}>
+      <body className={`${poppins.variable} ${spaceGrotesk.variable} font-sans relative`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-          <div className="fixed inset-0 -z-10">
-            <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--primary-rgb),0.15),transparent_70%)]" />
-            <ParticleBackground />
-          </div>
+          <BackgroundWrapper />
+          <CosmicCursor />
           <Navbar />
           {children}
           <Footer />
@@ -41,7 +45,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-
-import './globals.css'

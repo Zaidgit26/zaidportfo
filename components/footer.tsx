@@ -74,9 +74,7 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Floating elements */}
-      <div className="absolute top-1/2 left-10 w-20 h-20 rounded-full bg-primary/5 backdrop-blur-3xl floating opacity-30 hidden lg:block"></div>
-      <div className="absolute top-1/2 right-10 w-16 h-16 rounded-full bg-blue-500/5 backdrop-blur-3xl floating-delay-2 opacity-30 hidden lg:block"></div>
+      {/* Removed floating geometric shapes - galaxy background provides the cosmic effect */}
     </footer>
   )
 }

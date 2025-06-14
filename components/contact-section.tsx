@@ -100,7 +100,7 @@ export function ContactSection() {
       
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3 neo-text bg-clip-text text-transparent bg-gradient-to-r from-white to-white/90">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 neo-text bg-clip-text text-transparent bg-gradient-to-r from-white to-white/90 font-space-grotesk">
             Get In Touch
           </h2>
           <div className="w-24 h-1.5 bg-gradient-to-r from-primary to-blue-500 mx-auto mb-6 neo-glow rounded-full"></div>
@@ -207,7 +207,7 @@ export function ContactSection() {
               <Card key={index} className="neo-card overflow-hidden">
                 <CardContent className="p-6 flex flex-col items-center text-center">
                   <div className="mb-4">{info.icon}</div>
-                  <h3 className="text-lg font-medium mb-2 text-white">{info.title}</h3>
+                  <h3 className="text-lg font-medium mb-2 text-white font-space-grotesk">{info.title}</h3>
                   <a
                     href={info.link}
                     target="_blank"
@@ -222,7 +222,7 @@ export function ContactSection() {
 
             <Card className="neo-card overflow-hidden">
               <CardContent className="p-6">
-                <h3 className="text-lg font-medium mb-4 text-white text-center">Connect With Me</h3>
+                <h3 className="text-lg font-medium mb-4 text-white text-center font-space-grotesk">Connect With Me</h3>
                 <div className="flex justify-center space-x-4">
                   {socialLinks.map((link, index) => (
                     <a
@@ -243,9 +243,7 @@ export function ContactSection() {
         </div>
       </div>
 
-      {/* Floating elements */}
-      <div className="absolute top-1/4 left-10 w-24 h-24 rounded-full bg-primary/10 backdrop-blur-3xl floating-delay-1 opacity-30 hidden lg:block"></div>
-      <div className="absolute bottom-1/4 right-10 w-16 h-16 rounded-full bg-blue-500/10 backdrop-blur-3xl floating-delay-2 opacity-30 hidden lg:block"></div>
+      {/* Removed floating geometric shapes - galaxy background provides the cosmic effect */}
     </section>
   )
 }

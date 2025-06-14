@@ -8,7 +8,7 @@ export function AboutSection() {
     <section id="about" className="py-20 relative">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-2 neo-text">About Me</h2>
+          <h2 className="text-3xl font-bold mb-2 neo-text font-space-grotesk">About Me</h2>
           <div className="w-20 h-1 bg-primary mx-auto mb-6 neo-glow rounded-full"></div>
         </div>
 
@@ -28,19 +28,19 @@ export function AboutSection() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               <div className="neo-card p-4">
-                <h3 className="font-medium text-primary">Education</h3>
-                <p className="text-white/80 text-sm">MCA (Ongoing) - Measi Institute of Information Technology </p>
+                <h3 className="font-medium text-primary font-space-grotesk">Education</h3>
+                <p className="text-white/80 text-sm font-poppins">MCA (Ongoing) - Measi Institute of Information Technology </p>
               </div>
               <div className="neo-card p-4">
-                <h3 className="font-medium text-primary">Location</h3>
-                <p className="text-white/80 text-sm">Chennai, India</p>
+                <h3 className="font-medium text-primary font-space-grotesk">Location</h3>
+                <p className="text-white/80 text-sm font-poppins">Chennai, India</p>
               </div>
               <div className="neo-card p-4">
-                <h3 className="font-medium text-primary">Email</h3>
-                <p className="text-white/80 text-sm">reachme.zaid@gmail.com</p>
+                <h3 className="font-medium text-primary font-space-grotesk">Email</h3>
+                <p className="text-white/80 text-sm font-poppins">reachme.zaid@gmail.com</p>
               </div>
               <div className="neo-card p-4">
-                <h3 className="font-medium text-primary">Availability</h3>
+                <h3 className="font-medium text-primary font-space-grotesk">Availability</h3>
                 <p className="text-white/80 text-sm">Open to opportunities</p>
               </div>
             </div>
@@ -56,9 +56,7 @@ export function AboutSection() {
         </div>
       </div>
 
-      {/* Enhanced floating elements */}
-      <div className="absolute top-1/4 right-10 w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-blue-500/20 backdrop-blur-3xl floating opacity-30 hidden lg:block"></div>
-      <div className="absolute bottom-1/4 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-3xl floating-delay-2 opacity-30 hidden lg:block"></div>
+      {/* Removed floating geometric shapes - galaxy background provides the cosmic effect */}
     </section>
   )
 }

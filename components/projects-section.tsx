@@ -70,7 +70,7 @@ export function ProjectsSection() {
       
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3 neo-text bg-clip-text text-transparent bg-gradient-to-r from-white to-white/90">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 neo-text bg-clip-text text-transparent bg-gradient-to-r from-white to-white/90 font-space-grotesk">
             My Projects
           </h2>
           <div className="w-24 h-1.5 bg-gradient-to-r from-primary to-blue-500 mx-auto mb-6 neo-glow rounded-full"></div>
@@ -130,7 +130,7 @@ export function ProjectsSection() {
                 </div>
                 
                 <CardContent className="p-6 relative">
-                  <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-primary transition-colors duration-300">
+                  <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-primary transition-colors duration-300 font-space-grotesk">
                     {project.title}
                   </h3>
                   <p className="text-white/80 mb-4 text-sm leading-relaxed">
@@ -164,9 +164,7 @@ export function ProjectsSection() {
         </div>
       </div>
 
-      {/* Enhanced floating elements */}
-      <div className="absolute top-1/4 right-20 w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-blue-500/20 backdrop-blur-3xl floating-delay-2 opacity-30 hidden lg:block"></div>
-      <div className="absolute bottom-1/4 left-20 w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-3xl floating-delay-1 opacity-30 hidden lg:block"></div>
+      {/* Removed floating geometric shapes - galaxy background provides the cosmic effect */}
     </section>
   )
 }

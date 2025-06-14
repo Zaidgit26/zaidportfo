@@ -82,7 +82,7 @@ export function ExperienceSection() {
     <section id="experience" className="py-20 relative">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-2 neo-text">Experience & Education</h2>
+          <h2 className="text-3xl font-bold mb-2 neo-text font-space-grotesk">Experience & Education</h2>
           <div className="w-20 h-1 bg-primary mx-auto mb-6 neo-glow rounded-full"></div>
         </div>
 
@@ -120,8 +120,8 @@ export function ExperienceSection() {
                           <GraduationCap size={24} />
                         </div>
                         <div className="flex-grow">
-                          <h3 className="text-xl font-medium text-white">{item.degree}</h3>
-                          <p className="text-primary">{item.institution}</p>
+                          <h3 className="text-xl font-medium text-white font-space-grotesk">{item.degree}</h3>
+                          <p className="text-primary font-poppins">{item.institution}</p>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-sm">
                             <span className="text-white/70">{item.duration}</span>
                             {item.gpa && (
@@ -144,8 +144,8 @@ export function ExperienceSection() {
                           <Briefcase size={24} />
                         </div>
                         <div className="flex-grow">
-                          <h3 className="text-xl font-medium text-white">{item.title}</h3>
-                          <p className="text-primary">{item.organization}</p>
+                          <h3 className="text-xl font-medium text-white font-space-grotesk">{item.title}</h3>
+                          <p className="text-primary font-poppins">{item.organization}</p>
                           <p className="text-white/70 text-sm">{item.duration}</p>
                           <ul className="mt-3 space-y-2">
                             {item.details.map((detail, detailIndex) => (
@@ -164,9 +164,7 @@ export function ExperienceSection() {
         </div>
       </div>
 
-      {/* Floating elements */}
-      <div className="absolute top-1/3 right-10 w-20 h-20 rounded-full bg-primary/10 backdrop-blur-3xl floating opacity-30 hidden lg:block"></div>
-      <div className="absolute bottom-1/3 left-10 w-32 h-32 rounded-full bg-blue-500/10 backdrop-blur-3xl floating-delay-3 opacity-30 hidden lg:block"></div>
+      {/* Removed floating geometric shapes - galaxy background provides the cosmic effect */}
     </section>
   )
 }
