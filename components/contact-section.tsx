@@ -50,19 +50,19 @@ export function ContactSection() {
 
   const contactInfo = [
     {
-      icon: <Mail className="w-10 h-10 text-primary" />,
+      icon: <Mail className="w-8 h-8 text-primary" />,
       title: "Email",
       value: "reachme.zaid@gmail.com",
       link: "mailto:reachme.zaid@gmail.com",
     },
     {
-      icon: <Phone className="w-10 h-10 text-primary" />,
+      icon: <Phone className="w-8 h-8 text-primary" />,
       title: "Phone",
       value: "+91 7397006532",
       link: "tel:+917397006532",
     },
     {
-      icon: <MapPin className="w-10 h-10 text-primary" />,
+      icon: <MapPin className="w-8 h-8 text-primary" />,
       title: "Location",
       value: "Chennai, India",
       link: "https://maps.google.com/?q=Chennai,India",
@@ -85,7 +85,7 @@ export function ContactSection() {
     {
       icon: <ExternalLink size={20} />,
       name: "Resume",
-      url: "https://drive.google.com/file/d/1Hojq4Hx1jY4n0GnkjFnmm8lQWNXj2Coy/view",
+      url: "https://drive.google.com/file/d/1cB98YnieMnp488ptjxFEjATda_TXgj8t/view?usp=sharing",
       username: "Visit Here",
     },
   ]
@@ -202,17 +202,17 @@ export function ContactSection() {
             </Card>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {contactInfo.map((info, index) => (
               <Card key={index} className="neo-card overflow-hidden">
-                <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="mb-4">{info.icon}</div>
-                  <h3 className="text-lg font-medium mb-2 text-white font-space-grotesk">{info.title}</h3>
+                <CardContent className="p-4 flex flex-col items-center text-center">
+                  <div className="mb-2">{info.icon}</div>
+                  <h3 className="text-base font-medium mb-1 text-white font-space-grotesk">{info.title}</h3>
                   <a
                     href={info.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white/70 hover:text-primary transition-colors"
+                    className="text-white/70 hover:text-primary transition-colors text-sm"
                   >
                     {info.value}
                   </a>
@@ -221,18 +221,18 @@ export function ContactSection() {
             ))}
 
             <Card className="neo-card overflow-hidden">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-medium mb-4 text-white text-center font-space-grotesk">Connect With Me</h3>
-                <div className="flex justify-center space-x-4">
+              <CardContent className="p-4">
+                <h3 className="text-base font-medium mb-3 text-white text-center font-space-grotesk">Connect With Me</h3>
+                <div className="flex justify-center space-x-3">
                   {socialLinks.map((link, index) => (
                     <a
                       key={index}
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex flex-col items-center gap-2 text-white/70 hover:text-primary transition-colors group"
+                      className="flex flex-col items-center gap-1 text-white/70 hover:text-primary transition-colors group"
                     >
-                      <div className="p-3 rounded-full bg-primary/10 group-hover:neo-glow">{link.icon}</div>
+                      <div className="p-2 rounded-full bg-primary/10 group-hover:neo-glow">{link.icon}</div>
                       <span className="text-xs">{link.name}</span>
                     </a>
                   ))}

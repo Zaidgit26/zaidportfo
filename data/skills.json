@@ -1,0 +1,34 @@
+{
+  "skills": [
+    {
+      "id": 1,
+      "title": "Frontend Development",
+      "description": "React, Next.js, TypeScript",
+      "color": "#3B82F6"
+    },
+    {
+      "id": 2,
+      "title": "UI/UX Design",
+      "description": "Figma, Design Systems",
+      "color": "#8B5CF6"
+    },
+    {
+      "id": 3,
+      "title": "Backend Development",
+      "description": "Node.js, APIs, Databases",
+      "color": "#10B981"
+    },
+    {
+      "id": 4,
+      "title": "DevOps & Tools",
+      "description": "Git, Docker, CI/CD",
+      "color": "#F59E0B"
+    },
+    {
+      "id": 5,
+      "title": "AI & Automation",
+      "description": "Machine Learning, Automation",
+      "color": "#EF4444"
+    }
+  ]
+}

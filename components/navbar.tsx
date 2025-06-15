@@ -38,11 +38,21 @@ export function Navbar() {
     handleScroll()
 
     window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      // Cleanup: remove blur class when component unmounts
+      document.body.classList.remove('mobile-nav-open')
+    }
   }, [])
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
+    // Add/remove blur class to body when mobile menu opens/closes
+    if (!isOpen) {
+      document.body.classList.add('mobile-nav-open')
+    } else {
+      document.body.classList.remove('mobile-nav-open')
+    }
   }
 
   const smoothScrollTo = (targetId: string) => {
@@ -50,6 +60,8 @@ export function Navbar() {
     if (element) {
       // Close mobile menu if open
       setIsOpen(false)
+      // Remove blur when navigation item is clicked
+      document.body.classList.remove('mobile-nav-open')
 
       // Add click animation feedback
       setClickedItem(targetId)
@@ -143,7 +155,7 @@ export function Navbar() {
           <Button
             size="sm"
             className="bg-gradient-to-r from-primary/80 to-blue-500/80 hover:from-primary hover:to-blue-500 text-white group transition-all duration-300 border-none rounded-full px-4 py-2 shadow-lg"
-            onClick={() => window.open("https://drive.google.com/file/d/1Hojq4Hx1jY4n0GnkjFnmm8lQWNXj2Coy/view", "_blank")}
+            onClick={() => window.open("https://drive.google.com/file/d/1cB98YnieMnp488ptjxFEjATda_TXgj8t/view?usp=sharing", "_blank")}
           >
             <FileText size={14} className="mr-1" />
             Resume
@@ -154,7 +166,7 @@ export function Navbar() {
 
       {/* Mobile Hamburger Menu Button */}
       <button
-        className="md:hidden fixed top-4 right-4 z-50 text-white bg-black/30 backdrop-blur-xl p-3 rounded-full border border-white/10 hover:border-primary/30 transition-all duration-300 shadow-lg"
+        className="md:hidden fixed top-4 right-4 z-[10000] text-white bg-black/30 backdrop-blur-xl p-3 rounded-full border border-white/10 hover:border-primary/30 transition-all duration-300 shadow-lg"
         onClick={toggleMenu}
         aria-label="Toggle menu"
       >
@@ -165,50 +177,51 @@ export function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden fixed top-20 right-4 z-40 bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
-          >
-            <div className="p-6 flex flex-col space-y-4 min-w-[200px]">
-              {navLinks.map((link) => {
-                const IconComponent = link.icon
-                return (
-                  <button
-                    key={link.name}
-                    onClick={() => smoothScrollTo(link.href.substring(1))}
-                    className={cn(
-                      "flex items-center space-x-3 py-3 px-4 rounded-full text-left hover:bg-white/10 transition-all duration-300 w-full",
-                      activeSection === link.href.substring(1)
-                        ? "text-white bg-white/10 shadow-lg"
-                        : "text-white/80 hover:text-white",
-                      clickedItem === link.href.substring(1) && "scale-95 bg-primary/20"
-                    )}
-                  >
-                    <IconComponent size={20} />
-                    <span className="font-medium">{link.name}</span>
-                  </button>
-                )
-              })}
+              initial={{ opacity: 0, scale: 0.95, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden fixed top-20 right-4 z-[9999] bg-black/60 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 flex flex-col space-y-4 min-w-[200px]">
+                {navLinks.map((link) => {
+                  const IconComponent = link.icon
+                  return (
+                    <button
+                      key={link.name}
+                      onClick={() => smoothScrollTo(link.href.substring(1))}
+                      className={cn(
+                        "flex items-center space-x-3 py-3 px-4 rounded-full text-left hover:bg-white/10 transition-all duration-300 w-full",
+                        activeSection === link.href.substring(1)
+                          ? "text-white bg-white/10 shadow-lg"
+                          : "text-white/80 hover:text-white",
+                        clickedItem === link.href.substring(1) && "scale-95 bg-primary/20"
+                      )}
+                    >
+                      <IconComponent size={20} />
+                      <span className="font-medium">{link.name}</span>
+                    </button>
+                  )
+                })}
 
-              {/* Separator */}
-              <div className="w-full h-px bg-white/20 my-2" />
+                {/* Separator */}
+                <div className="w-full h-px bg-white/20 my-2" />
 
-              <Button
-                className="w-full bg-gradient-to-r from-primary/80 to-blue-500/80 hover:from-primary hover:to-blue-500 text-white group transition-all duration-300 border-none rounded-full shadow-lg"
-                size="sm"
-                onClick={() => {
-                  window.open("https://drive.google.com/file/d/1Hojq4Hx1jY4n0GnkjFnmm8lQWNXj2Coy/view", "_blank")
-                  setIsOpen(false)
-                }}
-              >
-                <FileText size={14} className="mr-2" />
-                Resume
-                <ChevronRight size={14} className="ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
-              </Button>
-            </div>
-          </motion.div>
+                <Button
+                  className="w-full bg-gradient-to-r from-primary/80 to-blue-500/80 hover:from-primary hover:to-blue-500 text-white group transition-all duration-300 border-none rounded-full shadow-lg"
+                  size="sm"
+                  onClick={() => {
+                    window.open("https://drive.google.com/file/d/1cB98YnieMnp488ptjxFEjATda_TXgj8t/view?usp=sharing", "_blank")
+                    setIsOpen(false)
+                    document.body.classList.remove('mobile-nav-open')
+                  }}
+                >
+                  <FileText size={14} className="mr-2" />
+                  Resume
+                  <ChevronRight size={14} className="ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                </Button>
+              </div>
+            </motion.div>
         )}
       </AnimatePresence>
     </header>

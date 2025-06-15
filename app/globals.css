@@ -224,6 +224,18 @@
   .section-enter-slow {
     animation: section-fade-in-slow 1.2s ease-out forwards;
   }
+
+  /* Mobile navigation - blur main content when nav is open */
+  .mobile-nav-open > * {
+    filter: blur(8px) brightness(0.3);
+    transition: filter 0.3s ease-in-out;
+  }
+
+  /* Keep navbar and mobile menu unblurred */
+  .mobile-nav-open header,
+  .mobile-nav-open header * {
+    filter: none !important;
+  }
 }
 
 @keyframes float {

@@ -2,8 +2,6 @@ import Link from "next/link"
 import { Github, Linkedin, Mail, ExternalLink } from "lucide-react"
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
-
   return (
     <footer className="py-8 border-t border-white/10 relative overflow-hidden">
       <div className="container mx-auto px-4">
@@ -70,7 +68,7 @@ export function Footer() {
             </Link>
           </div>
 
-          <p className="text-white/50 text-sm text-center">© {currentYear} Zaid Ahmed S. All rights reserved.</p>
+
         </div>
       </div>
 

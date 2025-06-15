@@ -111,7 +111,7 @@ export function HeroSection() {
         <div className="max-w-4xl transform-gpu">
           <h1 className={`text-4xl md:text-6xl font-bold mb-4 cosmic-text font-space-grotesk group cursor-default ${nameVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'} transition-all duration-700`}>
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-purple-200 drop-shadow-lg group-hover:from-blue-100 group-hover:via-purple-200 group-hover:to-white transition-all duration-500">
-              Hi, I'm Zaid Ahmed S
+              Hi, I'm Zaid Ahmed
             </span>
           </h1>
           <h2 className="text-xl md:text-2xl font-medium mb-6 text-white/80 font-space-grotesk">
@@ -121,7 +121,7 @@ export function HeroSection() {
             </span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-lg font-poppins">
-            Simplifying the complex with clean code and clever AI.
+            "Simplifying the complex with clean code and clever AI".
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-12 justify-center">
