@@ -1,112 +1,223 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useCallback } from "react"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface TrailPoint {
   x: number
   y: number
   opacity: number
-  id: string
+  scale: number
+  life: number
 }
 
 export function CosmicCursor() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [isVisible, setIsVisible] = useState(false)
-  const [trail, setTrail] = useState<TrailPoint[]>([])
-  const [idCounter, setIdCounter] = useState(0)
+  const isMobile = useIsMobile()
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const animationFrameRef = useRef<number>()
+  const mouseRef = useRef({ x: 0, y: 0 })
+  const isVisibleRef = useRef(false)
+  const trailRef = useRef<TrailPoint[]>([])
+  const lastUpdateRef = useRef(0)
+  const idCounterRef = useRef(0)
 
-  // Generate unique ID for trail points
-  const generateUniqueId = () => {
-    const newId = idCounter + 1
-    setIdCounter(newId)
-    return `trail-${Date.now()}-${newId}-${Math.random().toString(36).substr(2, 9)}`
-  }
+  // Performance constants
+  const TRAIL_LENGTH = 8
+  const UPDATE_INTERVAL = 16.67 // ~60fps
+  const FADE_SPEED = 0.08
+  const TRAIL_SPACING = 12 // Minimum distance between trail points
+
+  // Pre-calculated styles for better performance
+  const cursorStyle = useRef({
+    position: 'fixed' as const,
+    width: '20px',
+    height: '20px',
+    pointerEvents: 'none' as const,
+    zIndex: 9999,
+    borderRadius: '50%',
+    willChange: 'transform',
+    transform: 'translate3d(0, 0, 0)', // Hardware acceleration
+  })
+
+  // Optimized mouse move handler with throttling
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    const now = performance.now()
+    if (now - lastUpdateRef.current < UPDATE_INTERVAL) return
+
+    const newX = e.clientX
+    const newY = e.clientY
+
+    // Check if mouse moved enough to add new trail point
+    const lastTrail = trailRef.current[trailRef.current.length - 1]
+    if (lastTrail) {
+      const dx = newX - lastTrail.x
+      const dy = newY - lastTrail.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+
+      if (distance < TRAIL_SPACING) {
+        mouseRef.current = { x: newX, y: newY }
+        return
+      }
+    }
+
+    mouseRef.current = { x: newX, y: newY }
+    isVisibleRef.current = true
+
+    // Add new trail point
+    trailRef.current.push({
+      x: newX,
+      y: newY,
+      opacity: 1,
+      scale: 1,
+      life: 1
+    })
+
+    // Keep only last TRAIL_LENGTH points
+    if (trailRef.current.length > TRAIL_LENGTH) {
+      trailRef.current = trailRef.current.slice(-TRAIL_LENGTH)
+    }
+
+    lastUpdateRef.current = now
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    isVisibleRef.current = false
+  }, [])
+
+  const handleMouseEnter = useCallback(() => {
+    isVisibleRef.current = true
+  }, [])
+
+  // Optimized animation loop using canvas for better performance
+  const animate = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas || !isVisibleRef.current) {
+      animationFrameRef.current = requestAnimationFrame(animate)
+      return
+    }
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      animationFrameRef.current = requestAnimationFrame(animate)
+      return
+    }
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    // Update and draw trail points
+    trailRef.current = trailRef.current.map((point, index) => {
+      // Update life and opacity
+      point.life -= FADE_SPEED
+      point.opacity = Math.max(0, point.life)
+      point.scale = 0.3 + (index / TRAIL_LENGTH) * 0.7
+
+      if (point.opacity > 0) {
+        // Draw trail point with optimized rendering
+        const size = 6 * point.scale
+        const alpha = point.opacity * (index / TRAIL_LENGTH)
+
+        ctx.save()
+        ctx.globalAlpha = alpha
+        ctx.globalCompositeOperation = 'screen'
+
+        // Create gradient once and reuse
+        const gradient = ctx.createRadialGradient(
+          point.x, point.y, 0,
+          point.x, point.y, size
+        )
+        gradient.addColorStop(0, `rgba(255,255,255,${point.opacity * 0.8})`)
+        gradient.addColorStop(0.5, `rgba(56,139,253,${point.opacity * 0.6})`)
+        gradient.addColorStop(1, 'transparent')
+
+        ctx.fillStyle = gradient
+        ctx.beginPath()
+        ctx.arc(point.x, point.y, size, 0, Math.PI * 2)
+        ctx.fill()
+
+        ctx.restore()
+      }
+
+      return point
+    }).filter(point => point.opacity > 0)
+
+    // Draw main cursor
+    if (mouseRef.current.x && mouseRef.current.y) {
+      ctx.save()
+      ctx.globalCompositeOperation = 'screen'
+
+      // Main cursor gradient
+      const mainGradient = ctx.createRadialGradient(
+        mouseRef.current.x, mouseRef.current.y, 0,
+        mouseRef.current.x, mouseRef.current.y, 10
+      )
+      mainGradient.addColorStop(0, 'rgba(255,255,255,0.9)')
+      mainGradient.addColorStop(0.3, 'rgba(56,139,253,0.8)')
+      mainGradient.addColorStop(0.6, 'rgba(124,58,237,0.6)')
+      mainGradient.addColorStop(1, 'transparent')
+
+      ctx.fillStyle = mainGradient
+      ctx.beginPath()
+      ctx.arc(mouseRef.current.x, mouseRef.current.y, 10, 0, Math.PI * 2)
+      ctx.fill()
+
+      // Inner bright core
+      ctx.fillStyle = 'rgba(255,255,255,1)'
+      ctx.beginPath()
+      ctx.arc(mouseRef.current.x, mouseRef.current.y, 2, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.restore()
+    }
+
+    animationFrameRef.current = requestAnimationFrame(animate)
+  }, [])
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-      setIsVisible(true)
+    // Disable cursor effects on mobile devices for performance
+    if (isMobile) return
 
-      // Add trail point with unique ID
-      setTrail(prevTrail => {
-        const newTrail = [...prevTrail, {
-          x: e.clientX,
-          y: e.clientY,
-          opacity: 1,
-          id: generateUniqueId()
-        }]
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-        // Keep only last 8 trail points
-        return newTrail.slice(-8)
-      })
+    // Set canvas size
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
     }
 
-    const handleMouseLeave = () => {
-      setIsVisible(false)
-    }
+    resizeCanvas()
+    window.addEventListener('resize', resizeCanvas)
 
-    const handleMouseEnter = () => {
-      setIsVisible(true)
-    }
+    // Add event listeners
+    document.addEventListener("mousemove", handleMouseMove, { passive: true })
+    document.addEventListener("mouseleave", handleMouseLeave, { passive: true })
+    document.addEventListener("mouseenter", handleMouseEnter, { passive: true })
 
-    document.addEventListener("mousemove", handleMouseMove)
-    document.addEventListener("mouseleave", handleMouseLeave)
-    document.addEventListener("mouseenter", handleMouseEnter)
+    // Start animation
+    animationFrameRef.current = requestAnimationFrame(animate)
 
     return () => {
+      window.removeEventListener('resize', resizeCanvas)
       document.removeEventListener("mousemove", handleMouseMove)
       document.removeEventListener("mouseleave", handleMouseLeave)
       document.removeEventListener("mouseenter", handleMouseEnter)
+
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
     }
-  }, [])
+  }, [isMobile, handleMouseMove, handleMouseLeave, handleMouseEnter, animate])
 
-  // Fade out trail points
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTrail(prevTrail =>
-        prevTrail.map((point, index) => ({
-          ...point,
-          opacity: Math.max(0, point.opacity - 0.1)
-        })).filter(point => point.opacity > 0)
-      )
-    }, 50)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  if (!isVisible) return null
+  // Don't render anything on mobile
+  if (isMobile) return null
 
   return (
-    <>
-      {/* Trail particles */}
-      {trail.map((point, index) => (
-        <div
-          key={point.id}
-          className="fixed pointer-events-none z-[9998]"
-          style={{
-            left: point.x - 3,
-            top: point.y - 3,
-            width: '6px',
-            height: '6px',
-            background: `radial-gradient(circle, rgba(255,255,255,${point.opacity * 0.8}) 0%, rgba(56,139,253,${point.opacity * 0.6}) 50%, transparent 100%)`,
-            borderRadius: '50%',
-            opacity: point.opacity * (index / trail.length),
-            transform: `scale(${0.3 + (index / trail.length) * 0.7})`,
-            boxShadow: `0 0 ${4 + index}px rgba(255,255,255,${point.opacity * 0.5})`,
-            filter: 'blur(0.5px)',
-            mixBlendMode: 'screen'
-          }}
-        />
-      ))}
-
-      {/* Main cursor */}
-      <div
-        className="cosmic-cursor"
-        style={{
-          left: mousePosition.x - 10, // Center the cursor
-          top: mousePosition.y - 10,
-        }}
-      />
-    </>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-[9999]"
+      style={{ mixBlendMode: 'screen' }}
+      aria-hidden="true"
+    />
   )
 }

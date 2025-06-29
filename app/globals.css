@@ -70,35 +70,25 @@
     scroll-margin-top: 80px; /* Account for navbar height */
   }
 
-  /* Custom overexposed cursor */
-  .cosmic-cursor {
-    position: fixed;
-    width: 20px;
-    height: 20px;
-    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(56,139,253,0.8) 30%, rgba(124,58,237,0.6) 60%, transparent 100%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    mix-blend-mode: screen;
-    filter: blur(1px);
-    box-shadow:
-      0 0 10px rgba(255,255,255,0.8),
-      0 0 20px rgba(56,139,253,0.6),
-      0 0 30px rgba(124,58,237,0.4);
-    animation: cosmic-cursor-pulse 2s ease-in-out infinite;
+  /* Optimized cursor styles - now handled by canvas for better performance */
+  /* Keeping minimal CSS for fallback and mobile optimization */
+  @media (min-width: 769px) {
+    /* Hide default cursor on desktop for custom cursor effect */
+    body {
+      cursor: none;
+    }
+
+    /* Show default cursor on interactive elements */
+    a, button, input, textarea, select, [role="button"], [tabindex] {
+      cursor: pointer !important;
+    }
   }
 
-  .cosmic-cursor::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 4px;
-    height: 4px;
-    background: rgba(255,255,255,1);
-    border-radius: 50%;
-    box-shadow: 0 0 8px rgba(255,255,255,1);
+  @media (max-width: 768px) {
+    /* Ensure default cursor behavior on mobile */
+    body, * {
+      cursor: auto !important;
+    }
   }
 }
 

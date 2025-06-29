@@ -2,12 +2,14 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
-import { Mail, MapPin, Phone, Github, Linkedin, ExternalLink } from "lucide-react"
+import { Mail, MapPin, Phone, Github, Linkedin, ExternalLink, Send, AlertCircle, CheckCircle } from "lucide-react"
+import { sendEmail, initEmailJS, createMailtoLink } from "@/lib/email-service"
+import { toast } from "sonner"
 
 export function ContactSection() {
   const [formData, setFormData] = useState({
@@ -19,6 +21,24 @@ export function ContactSection() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [emailServiceReady, setEmailServiceReady] = useState(false)
+
+  // Initialize EmailJS on component mount
+  useEffect(() => {
+    try {
+      const isInitialized = initEmailJS()
+      setEmailServiceReady(isInitialized)
+
+      if (isInitialized) {
+        console.log('✅ EmailJS initialized successfully')
+      } else {
+        console.warn('⚠️ EmailJS not fully configured - check environment variables')
+      }
+    } catch (error) {
+      console.warn('❌ EmailJS initialization failed:', error)
+      setEmailServiceReady(false)
+    }
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -30,22 +50,59 @@ export function ContactSection() {
     setIsSubmitting(true)
     setSubmitMessage(null)
 
-    // Simulate form submission
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      setSubmitMessage({
-        type: "success",
-        text: "Thank you! Your message has been sent successfully.",
-      })
-      setFormData({ name: "", email: "", subject: "", message: "" })
+      // Send email using the email service
+      const result = await sendEmail(formData)
+
+      if (result.success) {
+        setSubmitMessage({
+          type: "success",
+          text: result.message,
+        })
+        setFormData({ name: "", email: "", subject: "", message: "" })
+
+        // Show success toast
+        toast.success("Message sent successfully!", {
+          description: "I'll get back to you as soon as possible.",
+          duration: 5000,
+        })
+      } else {
+        throw new Error(result.message)
+      }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to send message"
+
       setSubmitMessage({
         type: "error",
-        text: "Oops! Something went wrong. Please try again later.",
+        text: errorMessage,
+      })
+
+      // Show error toast with fallback option
+      toast.error("Failed to send message", {
+        description: "Please try the direct email link below or contact me directly.",
+        duration: 7000,
+        action: {
+          label: "Open Email",
+          onClick: () => {
+            const mailtoLink = createMailtoLink(formData)
+            window.open(mailtoLink, '_blank')
+          },
+        },
       })
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // Handle direct email fallback
+  const handleEmailFallback = () => {
+    const mailtoLink = createMailtoLink(formData)
+    window.open(mailtoLink, '_blank')
+
+    toast.info("Opening your email client", {
+      description: "A pre-filled email will open in your default email application.",
+      duration: 4000,
+    })
   }
 
   const contactInfo = [
@@ -114,6 +171,21 @@ export function ContactSection() {
           <div className="lg:col-span-2">
             <Card className="neo-card">
               <CardContent className="p-6">
+                {/* Email Service Status Indicator */}
+                <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className={`w-2 h-2 rounded-full ${emailServiceReady ? 'bg-green-400' : 'bg-yellow-400'}`}></div>
+                    <span className="text-white/80">
+                      Email Service: {emailServiceReady ? 'Ready' : 'Configuring...'}
+                    </span>
+                    {!emailServiceReady && (
+                      <span className="text-yellow-400 text-xs">
+                        (Messages will still be processed)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -178,23 +250,65 @@ export function ContactSection() {
                     />
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full bg-primary/20 border border-primary/50 hover:bg-primary/30 text-primary neo-glow"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Sending..." : "Send Message"}
-                  </Button>
+                  <div className="space-y-3">
+                    <Button
+                      type="submit"
+                      className="w-full bg-primary/20 border border-primary/50 hover:bg-primary/30 text-primary neo-glow transition-all duration-300 flex items-center justify-center gap-2"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          Send Message
+                        </>
+                      )}
+                    </Button>
+
+                    {/* Fallback email button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleEmailFallback}
+                      className="w-full bg-white/5 border border-white/20 hover:bg-white/10 text-white/80 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+                      disabled={isSubmitting}
+                    >
+                      <Mail className="w-4 h-4" />
+                      Open in Email Client
+                    </Button>
+                  </div>
 
                   {submitMessage && (
                     <div
-                      className={`p-3 rounded-md ${
+                      className={`p-4 rounded-lg flex items-start gap-3 ${
                         submitMessage.type === "success"
                           ? "bg-green-500/20 text-green-400 border border-green-500/30"
                           : "bg-red-500/20 text-red-400 border border-red-500/30"
                       }`}
                     >
-                      {submitMessage.text}
+                      {submitMessage.type === "success" ? (
+                        <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                      ) : (
+                        <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                      )}
+                      <div>
+                        <p className="font-medium">{submitMessage.text}</p>
+                        {submitMessage.type === "error" && (
+                          <p className="text-sm mt-1 opacity-80">
+                            You can also reach me directly at{" "}
+                            <a
+                              href="mailto:reachme.zaid@gmail.com"
+                              className="underline hover:no-underline"
+                            >
+                              reachme.zaid@gmail.com
+                            </a>
+                          </p>
+                        )}
+                      </div>
                     </div>
                   )}
                 </form>

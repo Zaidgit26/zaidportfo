@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useIsMobile } from "@/hooks/use-mobile"
 import NebulaEffects from "./nebula-effects"
 import AuroraEffects from "./aurora-effects"
 
@@ -88,6 +89,7 @@ export function GalaxyBackground({ section }: Interactive3DBackgroundProps) {
   const mouseRef = useRef({ x: 0, y: 0, rawX: 0, rawY: 0 })
   const [isLoaded, setIsLoaded] = useState(false)
   const zoomRef = useRef(1.0)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -120,8 +122,11 @@ export function GalaxyBackground({ section }: Interactive3DBackgroundProps) {
       initGalaxy()
     }
 
-    // Enhanced mouse tracking for cosmic particle interaction
+    // Enhanced mouse tracking for cosmic particle interaction (desktop only)
     const handleMouseMove = (e: MouseEvent) => {
+      // Skip expensive calculations on mobile
+      if (isMobile) return
+
       mouseRef.current = {
         x: (e.clientX / window.innerWidth) * 2 - 1, // Full range -1 to 1
         y: (e.clientY / window.innerHeight) * 2 - 1,
@@ -640,20 +645,20 @@ export function GalaxyBackground({ section }: Interactive3DBackgroundProps) {
         lastFallingStarTime = currentTime
       }
 
-      // Create cursor-following particles less frequently for performance
-      if (currentTime - lastCursorParticleTime > 400 + Math.random() * 600) {
-        if (mouseRef.current.rawX && mouseRef.current.rawY && cosmicDust.length < 200) { // Limit particles
+      // Create cursor-following particles only on desktop for performance
+      if (!isMobile && currentTime - lastCursorParticleTime > 600 + Math.random() * 800) {
+        if (mouseRef.current.rawX && mouseRef.current.rawY && cosmicDust.length < 150) { // Reduced particle limit
           cosmicDust.push({
-            x: mouseRef.current.rawX + (Math.random() - 0.5) * 100,
-            y: mouseRef.current.rawY + (Math.random() - 0.5) * 100,
+            x: mouseRef.current.rawX + (Math.random() - 0.5) * 80,
+            y: mouseRef.current.rawY + (Math.random() - 0.5) * 80,
             z: Math.random() * 200,
-            vx: (Math.random() - 0.5) * 2,
-            vy: (Math.random() - 0.5) * 2,
-            size: Math.random() * 1.5 + 0.5,
-            opacity: Math.random() * 0.8 + 0.4,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() - 0.5) * 1.5,
+            size: Math.random() * 1.2 + 0.4,
+            opacity: Math.random() * 0.7 + 0.3,
             color: Math.random() > 0.5 ? '#ffffff' : '#87ceeb',
             twinkle: Math.random() * Math.PI * 2,
-            twinkleSpeed: Math.random() * 0.03 + 0.02
+            twinkleSpeed: Math.random() * 0.025 + 0.015
           })
         }
         lastCursorParticleTime = currentTime
