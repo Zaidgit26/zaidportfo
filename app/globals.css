@@ -225,16 +225,46 @@
     animation: section-fade-in-slow 1.2s ease-out forwards;
   }
 
-  /* Mobile navigation - blur main content when nav is open */
-  .mobile-nav-open > * {
-    filter: blur(8px) brightness(0.3);
-    transition: filter 0.3s ease-in-out;
+  /* Mobile navigation - blur only main content and footer, not navigation */
+  .mobile-nav-open main,
+  .mobile-nav-open footer {
+    filter: blur(4px) brightness(0.3);
+    transition: filter 0.2s ease-out;
   }
 
-  /* Keep navbar and mobile menu unblurred */
+  /* Ensure navigation elements and background remain unblurred */
   .mobile-nav-open header,
-  .mobile-nav-open header * {
+  .mobile-nav-open header *,
+  .mobile-nav-open [data-mobile-nav],
+  .mobile-nav-open [data-mobile-nav] *,
+  .mobile-nav-open [class*="background"],
+  .mobile-nav-open [class*="cosmic"] {
     filter: none !important;
+  }
+
+  /* Optimized mobile nav styles */
+  .mobile-nav-open {
+    overflow: hidden;
+  }
+
+  /* Performance optimizations for mobile navigation */
+  @media (max-width: 768px) {
+    /* Reduce backdrop blur on mobile for better performance */
+    .mobile-nav-open::before {
+      backdrop-filter: blur(2px);
+    }
+
+    /* Optimize transitions for mobile */
+    .transition-all {
+      transition-property: color, background-color, border-color, opacity, transform;
+      transition-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    /* Hardware acceleration for mobile animations */
+    [data-mobile-nav] {
+      transform: translateZ(0);
+      will-change: transform, opacity;
+    }
   }
 }
 

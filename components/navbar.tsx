@@ -1,113 +1,80 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import Link from "next/link"
 import { FileText, ChevronRight, User, Code, FolderOpen, Briefcase, Mail, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
+import { useActiveSection } from "@/hooks/use-active-section"
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [activeSection, setActiveSection] = useState("home")
   const [showNav, setShowNav] = useState(false)
   const [clickedItem, setClickedItem] = useState<string | null>(null)
 
+  const activeSection = useActiveSection()
+
   useEffect(() => {
+    let ticking = false
+
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 100
-
-      setShowNav(true)
-      setScrolled(window.scrollY > 10)
-
-      const sections = document.querySelectorAll("section[id]")
-
-      sections.forEach((section) => {
-        const sectionTop = (section as HTMLElement).offsetTop
-        const sectionHeight = (section as HTMLElement).offsetHeight
-        const sectionId = section.getAttribute("id") || ""
-
-        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-          setActiveSection(sectionId)
-        }
-      })
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setShowNav(true)
+          setScrolled(window.scrollY > 10)
+          ticking = false
+        })
+        ticking = true
+      }
     }
 
     setShowNav(true)
     handleScroll()
 
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => {
       window.removeEventListener("scroll", handleScroll)
-      // Cleanup: remove blur class when component unmounts
       document.body.classList.remove('mobile-nav-open')
     }
   }, [])
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen)
-    // Add/remove blur class to body when mobile menu opens/closes
-    if (!isOpen) {
-      document.body.classList.add('mobile-nav-open')
-    } else {
-      document.body.classList.remove('mobile-nav-open')
-    }
-  }
+  const toggleMenu = useCallback(() => {
+    setIsOpen(prev => {
+      const newState = !prev
+      if (newState) {
+        document.body.classList.add('mobile-nav-open')
+      } else {
+        document.body.classList.remove('mobile-nav-open')
+      }
+      return newState
+    })
+  }, [])
 
-  const smoothScrollTo = (targetId: string) => {
+  const smoothScrollTo = useCallback((targetId: string) => {
     const element = document.getElementById(targetId)
     if (element) {
-      // Close mobile menu if open
       setIsOpen(false)
-      // Remove blur when navigation item is clicked
       document.body.classList.remove('mobile-nav-open')
 
-      // Add click animation feedback
       setClickedItem(targetId)
-      setTimeout(() => setClickedItem(null), 300)
+      setTimeout(() => setClickedItem(null), 200)
 
-      // Smooth scroll with custom easing
       element.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
       })
-
-      // Add custom smooth scroll with optimized animation
-      const startPosition = window.pageYOffset
-      const targetPosition = element.offsetTop - 80 // Account for navbar height
-      const distance = targetPosition - startPosition
-      const duration = 80 // smooth practical scrolling
-      let start: number | null = null
-
-      function animation(currentTime: number) {
-        if (start === null) start = currentTime
-        const timeElapsed = currentTime - start
-        const progress = Math.min(timeElapsed / duration, 1)
-
-        // Easing function for smooth animation (ease-in-out-cubic)
-        const easeInOutCubic = progress < 0.5
-          ? 4 * progress * progress * progress
-          : 1 - Math.pow(-2 * progress + 2, 3) / 2
-
-        window.scrollTo(0, startPosition + distance * easeInOutCubic)
-
-        if (timeElapsed < duration) {
-          requestAnimationFrame(animation)
-        }
-      }
-
-      requestAnimationFrame(animation)
     }
-  }
+  }, [])
 
-  const navLinks = [
+  const navLinks = useMemo(() => [
     { name: "About", href: "#about", icon: User },
     { name: "Skills", href: "#skills", icon: Code },
     { name: "Projects", href: "#projects", icon: FolderOpen },
     { name: "Experience", href: "#experience", icon: Briefcase },
     { name: "Contact", href: "#contact", icon: Mail },
-  ]
+  ], [])
 
   return (
     <header
@@ -127,35 +94,41 @@ export function Navbar() {
           : "bg-black/10 border-white/5"
       )}>
         <div className="flex items-center space-x-1">
-          {navLinks.map((link) => (
-            <button
-              key={link.name}
-              onClick={() => smoothScrollTo(link.href.substring(1))}
-              className={cn(
-                "px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 relative group",
-                activeSection === link.href.substring(1)
-                  ? "text-white bg-white/10 shadow-lg"
-                  : "text-white/70 hover:text-white hover:bg-white/5",
-                clickedItem === link.href.substring(1) && "scale-95 bg-primary/20"
-              )}
-            >
-              {activeSection === link.href.substring(1) && (
-                <motion.span
-                  layoutId="navbar-active-pill"
-                  className="absolute inset-0 bg-white/10 rounded-full -z-10 shadow-lg"
-                  transition={{ type: "spring", duration: 0.6 }}
-                />
-              )}
-              {link.name}
-            </button>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = activeSection === link.href.substring(1)
+            const isClicked = clickedItem === link.href.substring(1)
+
+            return (
+              <button
+                key={link.name}
+                onClick={() => smoothScrollTo(link.href.substring(1))}
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 relative group",
+                  isActive
+                    ? "text-white bg-white/10 shadow-lg"
+                    : "text-white/70 hover:text-white hover:bg-white/5",
+                  isClicked && "scale-95 bg-primary/20"
+                )}
+                style={{ willChange: 'transform' }}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="navbar-active-pill"
+                    className="absolute inset-0 bg-white/10 rounded-full -z-10 shadow-lg"
+                    transition={{ type: "tween", duration: 0.2, ease: "easeOut" }}
+                  />
+                )}
+                {link.name}
+              </button>
+            )
+          })}
 
           <div className="w-px h-6 bg-white/20 mx-2" />
 
           <Button
             size="sm"
             className="bg-gradient-to-r from-primary/80 to-blue-500/80 hover:from-primary hover:to-blue-500 text-white group transition-all duration-300 border-none rounded-full px-4 py-2 shadow-lg"
-            onClick={() => window.open("https://drive.google.com/file/d/1cB98YnieMnp488ptjxFEjATda_TXgj8t/view?usp=sharing", "_blank")}
+            onClick={() => window.open("https://drive.google.com/file/d/1hxZtbXkdk1GbSVsn7Gr3yj6uxJaL194l/view?usp=drive_link", "_blank")}
           >
             <FileText size={14} className="mr-1" />
             Resume
@@ -170,58 +143,86 @@ export function Navbar() {
         onClick={toggleMenu}
         aria-label="Toggle menu"
       >
-        {isOpen ? <X size={20} /> : <Menu size={20} />}
+        <motion.div
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ duration: 1, ease: "easeInOut" }}
+        >
+          {isOpen ? <X size={20} /> : <Menu size={20} />}
+        </motion.div>
       </button>
 
       {/* Mobile Navigation Menu */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="md:hidden fixed top-20 right-4 z-[9999] bg-black/60 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden"
-            >
-              <div className="p-6 flex flex-col space-y-4 min-w-[200px]">
-                {navLinks.map((link) => {
-                  const IconComponent = link.icon
-                  return (
-                    <button
-                      key={link.name}
-                      onClick={() => smoothScrollTo(link.href.substring(1))}
-                      className={cn(
-                        "flex items-center space-x-3 py-3 px-4 rounded-full text-left hover:bg-white/10 transition-all duration-300 w-full",
-                        activeSection === link.href.substring(1)
-                          ? "text-white bg-white/10 shadow-lg"
-                          : "text-white/80 hover:text-white",
-                        clickedItem === link.href.substring(1) && "scale-95 bg-primary/20"
-                      )}
-                    >
-                      <IconComponent size={20} />
-                      <span className="font-medium">{link.name}</span>
-                    </button>
-                  )
-                })}
+            initial={{ opacity: 0, scale: 0.9, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -10 }}
+            transition={{
+              duration: 1, // ← smooth 1 second slide animation
+              ease: [0.4, 0.0, 0.2, 1],
+              type: "tween"
+            }}
+            className="md:hidden fixed top-20 right-4 z-[9999] bg-black/60 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl overflow-hidden"
+            style={{ willChange: 'transform, opacity' }}
+            data-mobile-nav
+          >
+            <div className="p-6 flex flex-col space-y-4 min-w-[200px]">
+              {navLinks.map((link, index) => {
+                const IconComponent = link.icon
+                const isActive = activeSection === link.href.substring(1)
+                const isClicked = clickedItem === link.href.substring(1)
 
-                {/* Separator */}
-                <div className="w-full h-px bg-white/20 my-2" />
+                return (
+                  <motion.button
+                    key={link.name}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{
+                      duration: 0.1,
+                      delay: index * 0.02,
+                      ease: "easeOut"
+                    }}
+                    onClick={() => smoothScrollTo(link.href.substring(1))}
+                    className={cn(
+                      "flex items-center space-x-3 py-3 px-4 rounded-full text-left transition-colors duration-150 w-full",
+                      isActive
+                        ? "text-white bg-white/10 shadow-lg"
+                        : "text-white/80 hover:text-white hover:bg-white/5",
+                      isClicked && "scale-95 bg-primary/20"
+                    )}
+                    style={{ willChange: 'transform' }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <IconComponent size={20} />
+                    <span className="font-medium">{link.name}</span>
+                  </motion.button>
+                )
+              })}
 
+              <div className="w-full h-px bg-white/20 my-2" />
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.1, delay: 0.1 }}
+              >
                 <Button
-                  className="w-full bg-gradient-to-r from-primary/80 to-blue-500/80 hover:from-primary hover:to-blue-500 text-white group transition-all duration-300 border-none rounded-full shadow-lg"
+                  className="w-full bg-gradient-to-r from-primary/80 to-blue-500/80 hover:from-primary hover:to-blue-500 text-white group transition-colors duration-150 border-none rounded-full shadow-lg"
                   size="sm"
                   onClick={() => {
-                    window.open("https://drive.google.com/file/d/1cB98YnieMnp488ptjxFEjATda_TXgj8t/view?usp=sharing", "_blank")
+                    window.open("https://drive.google.com/file/d/1hxZtbXkdk1GbSVsn7Gr3yj6uxJaL194l/view?usp=drive_link", "_blank")
                     setIsOpen(false)
                     document.body.classList.remove('mobile-nav-open')
                   }}
                 >
                   <FileText size={14} className="mr-2" />
                   Resume
-                  <ChevronRight size={14} className="ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                  <ChevronRight size={14} className="ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150" />
                 </Button>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </header>
