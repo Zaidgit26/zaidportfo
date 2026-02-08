@@ -64,11 +64,12 @@ export default function NebulaEffects({ section }: NebulaEffectsProps) {
       }
     }
 
-    // Initialize particles
+    // Initialize particles with optimized count
     const initParticles = () => {
       particles.current = []
-      const particleCount = Math.floor((canvas.width * canvas.height) / 100000) + 5
-      
+      // Reduced particle count for better performance
+      const particleCount = Math.floor((canvas.width * canvas.height) / 200000) + 3 // Reduced count
+
       for (let i = 0; i < particleCount; i++) {
         particles.current.push(createParticle())
       }
@@ -114,24 +115,34 @@ export default function NebulaEffects({ section }: NebulaEffectsProps) {
       ctx.restore()
     }
 
-    // Animation loop
+    // Optimized animation loop with frame rate limiting
+    let lastFrameTime = 0
+    const targetFrameTime = 1000 / 60 // 60 FPS target
+
     const animate = (currentTime: number) => {
+      // Frame rate limiting for better performance
+      if (currentTime - lastFrameTime < targetFrameTime) {
+        animationFrameId.current = requestAnimationFrame(animate)
+        return
+      }
+      lastFrameTime = currentTime
+
       time.current = currentTime
-      
+
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
-      // Update and draw particles
+
+      // Update and draw particles with optimized calculations
       particles.current.forEach((particle, index) => {
         // Update position with slow drift
         particle.x += particle.drift.x
         particle.y += particle.drift.y
-        
-        // Update life
-        particle.life -= 0.5
-        
+
+        // Update life - reduced frequency for better performance
+        particle.life -= 0.3 // Slower decay
+
         // Respawn particle if it dies or goes off screen
-        if (particle.life <= 0 || 
+        if (particle.life <= 0 ||
             particle.x < -particle.size || particle.x > canvas.width + particle.size ||
             particle.y < -particle.size || particle.y > canvas.height + particle.size) {
           particles.current[index] = createParticle()
@@ -139,7 +150,7 @@ export default function NebulaEffects({ section }: NebulaEffectsProps) {
           drawParticle(particle)
         }
       })
-      
+
       animationFrameId.current = requestAnimationFrame(animate)
     }
 

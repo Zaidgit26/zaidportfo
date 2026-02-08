@@ -63,11 +63,12 @@ export default function AuroraEffects({ section }: AuroraEffectsProps) {
       }
     }
 
-    // Initialize waves
+    // Initialize waves with optimized count for performance
     const initWaves = () => {
       waves.current = []
-      const waveCount = 4 + Math.floor(Math.random() * 3)
-      
+      // Reduced wave count for better performance
+      const waveCount = 2 + Math.floor(Math.random() * 2) // Reduced from 4-6 to 2-3
+
       for (let i = 0; i < waveCount; i++) {
         waves.current.push(createWave())
       }
@@ -118,22 +119,32 @@ export default function AuroraEffects({ section }: AuroraEffectsProps) {
       ctx.restore()
     }
 
-    // Animation loop
+    // Optimized animation loop with frame rate limiting
+    let lastFrameTime = 0
+    const targetFrameTime = 1000 / 60 // 60 FPS target
+
     const animate = (currentTime: number) => {
+      // Frame rate limiting for better performance
+      if (currentTime - lastFrameTime < targetFrameTime) {
+        animationFrameId.current = requestAnimationFrame(animate)
+        return
+      }
+      lastFrameTime = currentTime
+
       time.current = currentTime
-      
+
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      
-      // Draw waves
+
+      // Draw waves with optimized calculations
       waves.current.forEach(wave => {
-        // Slowly drift the wave
+        // Slowly drift the wave - reduced calculations
         wave.x += Math.sin(time.current * 0.0003) * 0.1
         wave.phase += wave.speed * 0.5
-        
+
         drawWave(wave)
       })
-      
+
       animationFrameId.current = requestAnimationFrame(animate)
     }
 

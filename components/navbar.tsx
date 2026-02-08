@@ -15,29 +15,39 @@ export function Navbar() {
   const [clickedItem, setClickedItem] = useState<string | null>(null)
 
   useEffect(() => {
+    let ticking = false
+
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 100
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollPosition = window.scrollY + 100
 
-      setShowNav(true)
-      setScrolled(window.scrollY > 10)
+          setShowNav(true)
+          setScrolled(window.scrollY > 10)
 
-      const sections = document.querySelectorAll("section[id]")
+          const sections = document.querySelectorAll("section[id]")
 
-      sections.forEach((section) => {
-        const sectionTop = (section as HTMLElement).offsetTop
-        const sectionHeight = (section as HTMLElement).offsetHeight
-        const sectionId = section.getAttribute("id") || ""
+          sections.forEach((section) => {
+            const sectionTop = (section as HTMLElement).offsetTop
+            const sectionHeight = (section as HTMLElement).offsetHeight
+            const sectionId = section.getAttribute("id") || ""
 
-        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-          setActiveSection(sectionId)
-        }
-      })
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+              setActiveSection(sectionId)
+            }
+          })
+
+          ticking = false
+        })
+        ticking = true
+      }
     }
 
     setShowNav(true)
     handleScroll()
 
-    window.addEventListener("scroll", handleScroll)
+    // Use passive event listener for better performance
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => {
       window.removeEventListener("scroll", handleScroll)
       // Cleanup: remove blur class when component unmounts
@@ -45,32 +55,82 @@ export function Navbar() {
     }
   }, [])
 
+  // Click outside to close mobile menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (isOpen) {
+        const target = event.target as Element
+        const mobileMenu = document.querySelector('[data-mobile-menu]')
+        const hamburgerButton = document.querySelector('[data-hamburger-button]')
+
+        if (mobileMenu && hamburgerButton &&
+            !mobileMenu.contains(target) &&
+            !hamburgerButton.contains(target)) {
+          setIsOpen(false)
+          document.body.classList.remove('mobile-nav-open')
+        }
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('touchstart', handleClickOutside, { passive: true })
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+    }
+  }, [isOpen])
+
   const toggleMenu = () => {
-    setIsOpen(!isOpen)
-    // Add/remove blur class to body when mobile menu opens/closes
-    if (!isOpen) {
+    const newIsOpen = !isOpen
+    setIsOpen(newIsOpen)
+
+    // Add/remove blur class and prevent scrolling when mobile menu opens/closes
+    if (newIsOpen) {
       document.body.classList.add('mobile-nav-open')
+      // Store current scroll position
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
     } else {
       document.body.classList.remove('mobile-nav-open')
+      // Restore scroll position
+      const scrollY = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      window.scrollTo(0, parseInt(scrollY || '0') * -1)
     }
   }
 
   const smoothScrollTo = (targetId: string) => {
     const element = document.getElementById(targetId)
     if (element) {
-      // Close mobile menu if open
-      setIsOpen(false)
-      // Remove blur when navigation item is clicked
-      document.body.classList.remove('mobile-nav-open')
+      // Close mobile menu if open and restore scroll position
+      if (isOpen) {
+        setIsOpen(false)
+        document.body.classList.remove('mobile-nav-open')
+        // Restore scroll position
+        const scrollY = document.body.style.top
+        document.body.style.position = ''
+        document.body.style.top = ''
+        document.body.style.width = ''
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
 
       // Add click animation feedback
       setClickedItem(targetId)
       setTimeout(() => setClickedItem(null), 300)
 
-      // Smooth scroll with custom easing
-      element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
+      // Use requestAnimationFrame for smooth scroll
+      requestAnimationFrame(() => {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
       })
 
       // Add custom smooth scroll with optimized animation
@@ -166,9 +226,11 @@ export function Navbar() {
 
       {/* Mobile Hamburger Menu Button */}
       <button
-        className="md:hidden fixed top-4 right-4 z-[10000] text-white bg-black/30 backdrop-blur-xl p-3 rounded-full border border-white/10 hover:border-primary/30 transition-all duration-300 shadow-lg"
+        data-hamburger-button
+        className="md:hidden fixed top-4 right-4 z-[10000] text-white bg-black/30 backdrop-blur-xl p-3 rounded-full border border-white/10 hover:border-primary/30 transition-all duration-300 shadow-lg transform-gpu"
         onClick={toggleMenu}
         aria-label="Toggle menu"
+        style={{ willChange: 'transform' }}
       >
         {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -177,11 +239,16 @@ export function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+              data-mobile-menu
               initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="md:hidden fixed top-20 right-4 z-[9999] bg-black/60 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden"
+              transition={{
+                duration: 0.2, // Faster animation for better performance
+                ease: [0.4, 0.0, 0.2, 1] // Custom easing for smoother animation
+              }}
+              className="md:hidden fixed top-20 right-4 z-[9999] bg-black/60 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden transform-gpu"
+              style={{ willChange: 'transform, opacity' }}
             >
               <div className="p-6 flex flex-col space-y-4 min-w-[200px]">
                 {navLinks.map((link) => {

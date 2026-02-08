@@ -55,14 +55,24 @@
   * {
     @apply border-border;
   }
+
+  html {
+    scroll-behavior: smooth;
+    /* Performance optimizations */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     cursor: none; /* Hide default cursor */
-  }
-
-  html {
-    scroll-behavior: smooth;
+    /* Performance optimizations */
+    contain: layout style paint;
+    will-change: scroll-position;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   /* Section transition animations */
@@ -70,7 +80,7 @@
     scroll-margin-top: 80px; /* Account for navbar height */
   }
 
-  /* Custom overexposed cursor */
+  /* Hardware-accelerated cosmic cursor */
   .cosmic-cursor {
     position: fixed;
     width: 20px;
@@ -86,6 +96,10 @@
       0 0 20px rgba(56,139,253,0.6),
       0 0 30px rgba(124,58,237,0.4);
     animation: cosmic-cursor-pulse 2s ease-in-out infinite;
+    /* Hardware acceleration optimizations */
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   .cosmic-cursor::before {
@@ -117,18 +131,26 @@
 
   .floating {
     animation: float 6s ease-in-out infinite;
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .floating-delay-1 {
     animation: float 6s ease-in-out 1s infinite;
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .floating-delay-2 {
     animation: float 6s ease-in-out 2s infinite;
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   .floating-delay-3 {
     animation: float 6s ease-in-out 3s infinite;
+    will-change: transform;
+    transform: translateZ(0);
   }
   
   .animate-slow-spin {
@@ -143,11 +165,45 @@
     animation: pulse-glow 2s ease-in-out infinite;
   }
 
+  /* Hardware acceleration and performance optimizations */
   .transform-gpu {
     transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform;
   }
 
   .perspective-1000 {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+  }
+
+  .contain-layout {
+    contain: layout;
+  }
+
+  .contain-paint {
+    contain: paint;
+  }
+
+  .contain-strict {
+    contain: strict;
+  }
+
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .will-change-opacity {
+    will-change: opacity;
+  }
+
+  .will-change-auto {
+    will-change: auto;
+  }
+
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
     perspective: 1000px;
   }
 
@@ -225,52 +281,67 @@
     animation: section-fade-in-slow 1.2s ease-out forwards;
   }
 
-  /* Mobile navigation - blur main content when nav is open */
+  /* Mobile navigation - optimized blur with hardware acceleration */
   .mobile-nav-open > * {
     filter: blur(8px) brightness(0.3);
-    transition: filter 0.3s ease-in-out;
+    transition: filter 0.2s ease-out;
+    /* Hardware acceleration for better performance */
+    will-change: filter;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   /* Keep navbar and mobile menu unblurred */
   .mobile-nav-open header,
-  .mobile-nav-open header * {
+  .mobile-nav-open header *,
+  .mobile-nav-open [data-mobile-menu],
+  .mobile-nav-open [data-hamburger-button] {
     filter: none !important;
+    transform: translateZ(0);
+  }
+
+  /* Prevent scroll issues when mobile nav is open */
+  .mobile-nav-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
   }
 }
 
 @keyframes float {
   0% {
-    transform: translateY(0px);
+    transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translate3d(0, -10px, 0);
   }
   100% {
-    transform: translateY(0px);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes slow-spin {
   from {
-    transform: rotate(0deg);
+    transform: rotate3d(0, 0, 1, 0deg);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate3d(0, 0, 1, 360deg);
   }
 }
 
 @keyframes float-3d {
   0% {
-    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+    transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg);
   }
   33% {
-    transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+    transform: translate3d(0, -10px, 0) rotateX(5deg) rotateY(5deg);
   }
   66% {
-    transform: translateY(-5px) rotateX(-5deg) rotateY(-5deg);
+    transform: translate3d(0, -5px, 0) rotateX(-5deg) rotateY(-5deg);
   }
   100% {
-    transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+    transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg);
   }
 }
 
@@ -296,29 +367,29 @@
 
 @keyframes cosmic-drift {
   0% {
-    transform: translateX(0) translateY(0) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate3d(0, 0, 1, 0deg);
   }
   25% {
-    transform: translateX(10px) translateY(-5px) rotate(90deg);
+    transform: translate3d(10px, -5px, 0) rotate3d(0, 0, 1, 90deg);
   }
   50% {
-    transform: translateX(0) translateY(-10px) rotate(180deg);
+    transform: translate3d(0, -10px, 0) rotate3d(0, 0, 1, 180deg);
   }
   75% {
-    transform: translateX(-10px) translateY(-5px) rotate(270deg);
+    transform: translate3d(-10px, -5px, 0) rotate3d(0, 0, 1, 270deg);
   }
   100% {
-    transform: translateX(0) translateY(0) rotate(360deg);
+    transform: translate3d(0, 0, 0) rotate3d(0, 0, 1, 360deg);
   }
 }
 
 @keyframes cosmic-cursor-pulse {
   0%, 100% {
-    transform: scale(1);
+    transform: scale3d(1, 1, 1);
     opacity: 0.8;
   }
   50% {
-    transform: scale(1.2);
+    transform: scale3d(1.2, 1.2, 1);
     opacity: 1;
   }
 }

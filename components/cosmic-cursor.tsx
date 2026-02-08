@@ -23,22 +23,41 @@ export function CosmicCursor() {
   }
 
   useEffect(() => {
+    let lastTrailTime = 0
+    const trailInterval = 16 // ~60fps for trail updates
+
     const handleMouseMove = (e: MouseEvent) => {
+      const currentTime = performance.now()
+
       setMousePosition({ x: e.clientX, y: e.clientY })
       setIsVisible(true)
 
-      // Add trail point with unique ID
-      setTrail(prevTrail => {
-        const newTrail = [...prevTrail, {
-          x: e.clientX,
-          y: e.clientY,
-          opacity: 1,
-          id: generateUniqueId()
-        }]
+      // Throttle trail point creation for better performance
+      if (currentTime - lastTrailTime >= trailInterval) {
+        setTrail(prevTrail => {
+          const lastPoint = prevTrail[prevTrail.length - 1]
 
-        // Keep only last 8 trail points
-        return newTrail.slice(-8)
-      })
+          // Only add trail point if mouse moved significantly (reduces trail density)
+          const distance = lastPoint ?
+            Math.sqrt(Math.pow(e.clientX - lastPoint.x, 2) + Math.pow(e.clientY - lastPoint.y, 2)) :
+            Infinity
+
+          if (distance > 8) { // Minimum distance threshold
+            const newTrail = [...prevTrail, {
+              x: e.clientX,
+              y: e.clientY,
+              opacity: 1,
+              id: generateUniqueId()
+            }]
+
+            // Keep only last 6 trail points for better performance
+            return newTrail.slice(-6)
+          }
+
+          return prevTrail
+        })
+        lastTrailTime = currentTime
+      }
     }
 
     const handleMouseLeave = () => {
@@ -49,9 +68,10 @@ export function CosmicCursor() {
       setIsVisible(true)
     }
 
-    document.addEventListener("mousemove", handleMouseMove)
-    document.addEventListener("mouseleave", handleMouseLeave)
-    document.addEventListener("mouseenter", handleMouseEnter)
+    // Use passive event listeners for better performance
+    document.addEventListener("mousemove", handleMouseMove, { passive: true })
+    document.addEventListener("mouseleave", handleMouseLeave, { passive: true })
+    document.addEventListener("mouseenter", handleMouseEnter, { passive: true })
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove)
@@ -60,51 +80,68 @@ export function CosmicCursor() {
     }
   }, [])
 
-  // Fade out trail points
+  // Optimized fade out trail points using requestAnimationFrame
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTrail(prevTrail =>
-        prevTrail.map((point, index) => ({
-          ...point,
-          opacity: Math.max(0, point.opacity - 0.1)
-        })).filter(point => point.opacity > 0)
-      )
-    }, 50)
+    let animationFrameId: number
+    let lastFadeTime = 0
+    const fadeInterval = 50 // Fade every 50ms
 
-    return () => clearInterval(interval)
+    const fadeTrail = (currentTime: number) => {
+      if (currentTime - lastFadeTime >= fadeInterval) {
+        setTrail(prevTrail =>
+          prevTrail.map((point, index) => ({
+            ...point,
+            opacity: Math.max(0, point.opacity - 0.12) // Slightly faster fade for better performance
+          })).filter(point => point.opacity > 0)
+        )
+        lastFadeTime = currentTime
+      }
+
+      animationFrameId = requestAnimationFrame(fadeTrail)
+    }
+
+    animationFrameId = requestAnimationFrame(fadeTrail)
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+      }
+    }
   }, [])
 
   if (!isVisible) return null
 
   return (
     <>
-      {/* Trail particles */}
+      {/* Hardware-accelerated trail particles */}
       {trail.map((point, index) => (
         <div
           key={point.id}
           className="fixed pointer-events-none z-[9998]"
           style={{
-            left: point.x - 3,
-            top: point.y - 3,
             width: '6px',
             height: '6px',
             background: `radial-gradient(circle, rgba(255,255,255,${point.opacity * 0.8}) 0%, rgba(56,139,253,${point.opacity * 0.6}) 50%, transparent 100%)`,
             borderRadius: '50%',
             opacity: point.opacity * (index / trail.length),
-            transform: `scale(${0.3 + (index / trail.length) * 0.7})`,
+            // Use transform3d for hardware acceleration instead of left/top
+            transform: `translate3d(${point.x - 3}px, ${point.y - 3}px, 0) scale(${0.3 + (index / trail.length) * 0.7})`,
             boxShadow: `0 0 ${4 + index}px rgba(255,255,255,${point.opacity * 0.5})`,
             filter: 'blur(0.5px)',
-            mixBlendMode: 'screen'
+            mixBlendMode: 'screen',
+            // Hardware acceleration optimizations
+            willChange: 'transform, opacity',
+            backfaceVisibility: 'hidden'
           }}
         />
       ))}
 
-      {/* Main cursor */}
+      {/* Hardware-accelerated main cursor */}
       <div
         className="cosmic-cursor"
         style={{
-          left: mousePosition.x - 10, // Center the cursor
-          top: mousePosition.y - 10,
+          // Use transform3d for hardware acceleration instead of left/top
+          transform: `translate3d(${mousePosition.x - 10}px, ${mousePosition.y - 10}px, 0)`,
         }}
       />
     </>

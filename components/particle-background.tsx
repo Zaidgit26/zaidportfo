@@ -34,10 +34,11 @@ export function ParticleBackground() {
       initParticles()
     }
 
-    // Initialize particles
+    // Initialize particles with optimized count
     const initParticles = () => {
       particles = []
-      const particleCount = Math.floor((window.innerWidth * window.innerHeight) / 12000)
+      // Reduced particle count for better performance
+      const particleCount = Math.floor((window.innerWidth * window.innerHeight) / 20000)
 
       // Get primary color from CSS variable
       const primaryRgb = getComputedStyle(document.documentElement).getPropertyValue('--primary-rgb').trim() || '56, 139, 253'
@@ -118,12 +119,35 @@ export function ParticleBackground() {
       }
     }
 
-    // Animation loop with delta time
+    // Optimized animation loop with frame rate limiting
     let lastTime = performance.now()
+    let frameCount = 0
+    let lastFPSTime = performance.now()
+    const targetFrameTime = 1000 / 60 // 60 FPS target
+
     const animate = (currentTime: number) => {
+      // Frame rate limiting
+      if (currentTime - lastTime < targetFrameTime) {
+        animationFrameId = requestAnimationFrame(animate)
+        return
+      }
+
       const deltaTime = (currentTime - lastTime) / 16.67 // Normalize to ~60 FPS
       lastTime = currentTime
-      
+
+      // Performance monitoring
+      frameCount++
+      if (currentTime - lastFPSTime >= 1000) {
+        const fps = frameCount
+        frameCount = 0
+        lastFPSTime = currentTime
+
+        // Adaptive quality - reduce particles if performance is poor
+        if (fps < 45 && particles.length > 20) {
+          particles.splice(Math.floor(particles.length * 0.8))
+        }
+      }
+
       drawParticles(deltaTime)
       animationFrameId = requestAnimationFrame(animate)
     }

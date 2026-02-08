@@ -96,6 +96,9 @@ export function GalaxyBackground({ section }: Interactive3DBackgroundProps) {
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
+    // Performance optimizations
+    ctx.imageSmoothingEnabled = false // Disable antialiasing for better performance
+
     let animationFrameId: number
     let stars: Star[] = []
     let backgroundStars: Star[] = []
@@ -112,6 +115,11 @@ export function GalaxyBackground({ section }: Interactive3DBackgroundProps) {
     let lastFrameTime = 0
     const targetFPS = 60
     const frameInterval = 1000 / targetFPS
+
+    // Performance tracking
+    let frameCount = 0
+    let lastFPSTime = performance.now()
+    let currentFPS = 60
 
     // Set canvas size
     const resizeCanvas = () => {
@@ -614,14 +622,35 @@ export function GalaxyBackground({ section }: Interactive3DBackgroundProps) {
       ctx.restore()
     }
 
-    // Optimized animation loop with frame rate limiting
+    // Optimized animation loop with frame rate limiting and performance monitoring
     const animate = (currentTime: number) => {
       // Frame rate limiting for better performance
       if (currentTime - lastFrameTime < frameInterval) {
         animationFrameId = requestAnimationFrame(animate)
         return
       }
+
+      const deltaTime = currentTime - lastFrameTime
       lastFrameTime = currentTime
+
+      // Performance monitoring
+      frameCount++
+      if (currentTime - lastFPSTime >= 1000) {
+        currentFPS = frameCount
+        frameCount = 0
+        lastFPSTime = currentTime
+
+        // Adaptive quality based on performance
+        if (currentFPS < 45) {
+          // Reduce particle counts if performance is poor
+          if (cosmicDust.length > 100) {
+            cosmicDust.splice(100)
+          }
+          if (galaxyParticles.length > 50) {
+            galaxyParticles.splice(50)
+          }
+        }
+      }
 
       time = currentTime * 0.001
 
@@ -629,20 +658,20 @@ export function GalaxyBackground({ section }: Interactive3DBackgroundProps) {
       zoomRef.current = Math.max(0.6, 1 + Math.sin(time * 0.0003) * 0.6 + 0.2) // Much slower and more pronounced zoom
 
       // Create shooting stars less frequently for performance
-      if (currentTime - lastShootingStarTime > 4000 + Math.random() * 4000 && shootingStars.length < 5) {
+      if (currentTime - lastShootingStarTime > 4000 + Math.random() * 4000 && shootingStars.length < 3) { // Reduced max count
         shootingStars.push(createShootingStar())
         lastShootingStarTime = currentTime
       }
 
       // Create falling stars less frequently
-      if (currentTime - lastFallingStarTime > 6000 + Math.random() * 6000 && fallingStars.length < 3) {
+      if (currentTime - lastFallingStarTime > 8000 + Math.random() * 8000 && fallingStars.length < 2) { // Reduced frequency and count
         fallingStars.push(createFallingStar())
         lastFallingStarTime = currentTime
       }
 
       // Create cursor-following particles less frequently for performance
-      if (currentTime - lastCursorParticleTime > 400 + Math.random() * 600) {
-        if (mouseRef.current.rawX && mouseRef.current.rawY && cosmicDust.length < 200) { // Limit particles
+      if (currentTime - lastCursorParticleTime > 600 + Math.random() * 800) { // Reduced frequency
+        if (mouseRef.current.rawX && mouseRef.current.rawY && cosmicDust.length < 150) { // Reduced limit
           cosmicDust.push({
             x: mouseRef.current.rawX + (Math.random() - 0.5) * 100,
             y: mouseRef.current.rawY + (Math.random() - 0.5) * 100,
