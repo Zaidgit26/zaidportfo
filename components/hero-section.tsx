@@ -4,6 +4,9 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowDown, Github, Linkedin, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
+import { EnhancedMotion, StaggerContainer, StaggerItem, HoverAnimation } from "@/components/enhanced-animations"
+import { smoothScrollTo } from "@/components/smooth-scroll-provider"
 
 export function HeroSection() {
   const [typedText, setTypedText] = useState("")
@@ -72,35 +75,12 @@ export function HeroSection() {
     return () => clearInterval(cursorInterval)
   }, [])
 
-  const smoothScrollTo = (targetId: string) => {
-    const element = document.getElementById(targetId)
-    if (element) {
-      // Smooth scroll with custom easing
-      const startPosition = window.pageYOffset
-      const targetPosition = element.offsetTop - 80 // Account for navbar height
-      const distance = targetPosition - startPosition
-      const duration = 800 // 0.8 seconds for smooth but practical scrolling
-      let start: number | null = null
-
-      function animation(currentTime: number) {
-        if (start === null) start = currentTime
-        const timeElapsed = currentTime - start
-        const progress = Math.min(timeElapsed / duration, 1)
-
-        // Easing function for smooth animation (ease-in-out-cubic)
-        const easeInOutCubic = progress < 0.5
-          ? 4 * progress * progress * progress
-          : 1 - Math.pow(-2 * progress + 2, 3) / 2
-
-        window.scrollTo(0, startPosition + distance * easeInOutCubic)
-
-        if (timeElapsed < duration) {
-          requestAnimationFrame(animation)
-        }
-      }
-
-      requestAnimationFrame(animation)
-    }
+  // Enhanced smooth scroll function using Lenis
+  const handleSmoothScrollTo = (targetId: string) => {
+    smoothScrollTo(`#${targetId}`, {
+      offset: -80, // Account for navbar height
+      duration: 1.2 // Buttery smooth duration
+    })
   }
 
   return (
@@ -108,82 +88,141 @@ export function HeroSection() {
       {/* Removed floating geometric shapes - keeping only galaxy background effects */}
 
       <div className="container mx-auto px-4 py-16 flex flex-col items-center text-center relative z-10">
-        <div className="max-w-4xl transform-gpu">
-          <h1 className={`text-4xl md:text-6xl font-bold mb-4 cosmic-text font-space-grotesk group cursor-default ${nameVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'} transition-all duration-700`}>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-purple-200 drop-shadow-lg group-hover:from-blue-100 group-hover:via-purple-200 group-hover:to-white transition-all duration-500">
-              Hi, I'm Zaid Ahmed
-            </span>
-          </h1>
-          <h2 className="text-xl md:text-2xl font-medium mb-6 text-white/80 font-space-grotesk">
-            {typedText}
-            <span className={cn("ml-1 inline-block w-2 h-8 bg-primary transition-opacity duration-300", showCursor ? "opacity-100" : "opacity-0")}>
-              &nbsp;
-            </span>
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-lg font-poppins">
-            "Simplifying the complex with clean code and clever AI".
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 mb-12 justify-center">
-            <Button
-              size="lg"
-              className="bg-primary/20 border border-primary/50 hover:bg-primary/30 text-primary galaxy-glow transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-primary/25"
-              onClick={() => smoothScrollTo("projects")}
+        <StaggerContainer className="max-w-4xl transform-gpu">
+          <StaggerItem>
+            <motion.h1
+              className="text-4xl md:text-6xl font-bold mb-4 cosmic-text font-space-grotesk group cursor-default"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: nameVisible ? 1 : 0, y: nameVisible ? 0 : 30 }}
+              transition={{
+                duration: 0.8,
+                ease: [0.25, 0.46, 0.45, 0.94],
+                delay: 0.2
+              }}
             >
-              View My Work
-            </Button>
-
-            <Button
-              size="lg"
-              variant="outline"
-              className="nebula-card border-white/20 hover:border-white/40 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-white/25"
-              onClick={() => window.location.href = "mailto:reachme.zaid@gmail.com"}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-purple-200 drop-shadow-lg group-hover:from-blue-100 group-hover:via-purple-200 group-hover:to-white transition-all duration-500">
+                Hi, I'm Zaid Ahmed
+              </span>
+            </motion.h1>
+          </StaggerItem>
+          <StaggerItem delay={0.1}>
+            <motion.h2
+              className="text-xl md:text-2xl font-medium mb-6 text-white/80 font-space-grotesk"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.6,
+                ease: [0.25, 0.46, 0.45, 0.94],
+                delay: 0.6
+              }}
             >
-              Contact Me
-            </Button>
+              {typedText}
+              <span className={cn("ml-1 inline-block w-2 h-8 bg-primary transition-opacity duration-300", showCursor ? "opacity-100" : "opacity-0")}>
+                &nbsp;
+              </span>
+            </motion.h2>
+          </StaggerItem>
+
+          <StaggerItem delay={0.2}>
+            <EnhancedMotion variant="fadeIn" delay={0.8}>
+              <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-lg font-poppins">
+                "Simplifying the complex with clean code and clever AI".
+              </p>
+            </EnhancedMotion>
+          </StaggerItem>
+
+          <StaggerItem delay={0.3}>
+            <EnhancedMotion variant="slideUp" delay={1.0}>
+              <div className="flex flex-col sm:flex-row gap-4 mb-12 justify-center">
+                <HoverAnimation scale={1.05} y={-4}>
+                  <Button
+                    size="lg"
+                    className="bg-primary/20 border border-primary/50 hover:bg-primary/30 text-primary galaxy-glow smooth-transition shadow-lg hover:shadow-primary/25"
+                    onClick={() => handleSmoothScrollTo("projects")}
+                  >
+                    View My Work
+                  </Button>
+                </HoverAnimation>
+
+                <HoverAnimation scale={1.05} y={-4}>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="nebula-card border-white/20 hover:border-white/40 smooth-transition shadow-lg hover:shadow-white/25"
+                    onClick={() => window.location.href = "mailto:reachme.zaid@gmail.com"}
+                  >
+                    Contact Me
+                  </Button>
+                </HoverAnimation>
+              </div>
+            </EnhancedMotion>
+          </StaggerItem>
+
+          <StaggerItem delay={0.4}>
+            <EnhancedMotion variant="fadeIn" delay={1.2}>
+              <div className="flex space-x-6 mb-16 justify-center">
+                <HoverAnimation scale={1.1} y={-3}>
+                  <a
+                    href="https://github.com/Zaidgit26"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary smooth-transition p-3 rounded-full nebula-card hover:border-primary/30"
+                  >
+                    <Github size={24} />
+                    <span className="sr-only">GitHub</span>
+                  </a>
+                </HoverAnimation>
+
+                <HoverAnimation scale={1.1} y={-3}>
+                  <a
+                    href="https://in.linkedin.com/in/zaid-ahmed-s-33008023b"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary smooth-transition p-3 rounded-full nebula-card hover:border-primary/30"
+                  >
+                    <Linkedin size={24} />
+                    <span className="sr-only">LinkedIn</span>
+                  </a>
+                </HoverAnimation>
+
+                <HoverAnimation scale={1.1} y={-3}>
+                  <a
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary smooth-transition p-3 rounded-full nebula-card hover:border-primary/30"
+                  >
+                    <ExternalLink size={24} />
+                    <span className="sr-only">Portfolio</span>
+                  </a>
+                </HoverAnimation>
+              </div>
+            </EnhancedMotion>
+          </StaggerItem>
+        </StaggerContainer>
+
+        <EnhancedMotion variant="fadeIn" delay={1.5}>
+          <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+            <motion.div
+              className="text-white/50 mb-2 text-sm"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              Scroll Down
+            </motion.div>
+            <HoverAnimation scale={1.1} y={-2}>
+              <motion.button
+                onClick={() => handleSmoothScrollTo("about")}
+                className="nebula-card rounded-full p-4 border border-primary/30 hover:border-primary/50 smooth-transition"
+                aria-label="Scroll down"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <ArrowDown size={20} className="text-primary" />
+              </motion.button>
+            </HoverAnimation>
           </div>
-
-          <div className="flex space-x-6 mb-16 justify-center">
-            <a
-              href="https://github.com/Zaidgit26"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary transition-colors duration-300 p-3 rounded-full nebula-card hover:border-primary/30"
-            >
-              <Github size={24} />
-              <span className="sr-only">GitHub</span>
-            </a>
-            <a
-              href="https://in.linkedin.com/in/zaid-ahmed-s-33008023b"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary transition-colors duration-300 p-3 rounded-full nebula-card hover:border-primary/30"
-            >
-              <Linkedin size={24} />
-              <span className="sr-only">LinkedIn</span>
-            </a>
-            <a
-              href="#"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary transition-colors duration-300 p-3 rounded-full nebula-card hover:border-primary/30"
-            >
-              <ExternalLink size={24} />
-              <span className="sr-only">Portfolio</span>
-            </a>
-          </div>
-        </div>
-
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
-          <div className="text-white/50 mb-2 text-sm animate-cosmic-pulse">Scroll Down</div>
-          <button
-            onClick={() => smoothScrollTo("about")}
-            className="animate-gentle-bounce nebula-card rounded-full p-4 border border-primary/30 hover:border-primary/50 transition-all duration-600 hover:scale-110"
-            aria-label="Scroll down"
-          >
-            <ArrowDown size={20} className="text-primary" />
-          </button>
-        </div>
+        </EnhancedMotion>
 
         {/* Removed additional floating geometric shapes - galaxy background provides the cosmic effect */}
       </div>

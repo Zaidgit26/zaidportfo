@@ -51,11 +51,19 @@ export function Interactive3DBackground({ section }: Interactive3DBackgroundProp
       }
     }
 
-    // Initialize particles based on section
+    // Initialize particles based on section with performance optimization
     const initParticles = () => {
       currentParticles = []
-      const particleCount = Math.floor((window.innerWidth * window.innerHeight) / 15000)
-      
+
+      // Performance-based particle count reduction
+      const screenArea = window.innerWidth * window.innerHeight
+      const isMobile = window.innerWidth < 768
+      const isLowEnd = navigator.hardwareConcurrency <= 4 || isMobile
+
+      // Much more aggressive reduction for 3D particles
+      const baseCount = isLowEnd ? 40000 : isMobile ? 30000 : 20000
+      const particleCount = Math.floor(screenArea / baseCount)
+
       for (let i = 0; i < particleCount; i++) {
         currentParticles.push(createParticleForSection(section))
       }
@@ -201,8 +209,23 @@ export function Interactive3DBackground({ section }: Interactive3DBackgroundProp
       ctx.restore()
     }
 
-    // Animation loop
-    const animate = () => {
+    // Animation loop with frame rate limiting
+    let lastFrameTime = 0
+
+    // Adaptive frame rate based on device performance
+    const isMobile = window.innerWidth < 768
+    const isLowEnd = navigator.hardwareConcurrency <= 4 || isMobile
+    const targetFPS = isLowEnd ? 30 : isMobile ? 45 : 60
+    const frameInterval = 1000 / targetFPS
+
+    const animate = (currentTime: number) => {
+      // Frame rate limiting for better performance
+      if (currentTime - lastFrameTime < frameInterval) {
+        animationFrameId = requestAnimationFrame(animate)
+        return
+      }
+      lastFrameTime = currentTime
+
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       currentParticles.forEach(particle => {
@@ -228,7 +251,7 @@ export function Interactive3DBackground({ section }: Interactive3DBackgroundProp
 
     // Initialize
     resizeCanvas()
-    animate()
+    animate(0)
 
     // Event listeners
     window.addEventListener("resize", resizeCanvas)

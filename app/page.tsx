@@ -1,20 +1,17 @@
-import { HeroSection } from "@/components/hero-section"
-import { AboutSection } from "@/components/about-section"
-import { SkillsSection } from "@/components/skills-section"
-import { ProjectsSection } from "@/components/projects-section"
-import { ExperienceSection } from "@/components/experience-section"
-import { ContactSection } from "@/components/contact-section"
+import { ActOneSignal } from "@/components/act-one-signal";
+import { ActTwoWork } from "@/components/act-two-work";
+import { ActThreeMethod } from "@/components/act-three-method";
+import { ActFourChapter } from "@/components/act-four-chapter";
+import { ActFiveLine } from "@/components/act-five-line";
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
-      <HeroSection />
-      <AboutSection />
-      <SkillsSection />
-      <ProjectsSection />
-      <ExperienceSection />
-      <ContactSection />
+    <main className="relative w-full flex flex-col">
+      <ActOneSignal />
+      <ActTwoWork />
+      <ActThreeMethod />
+      <ActFourChapter />
+      <ActFiveLine />
     </main>
-  )
+  );
 }
-

@@ -110,7 +110,11 @@ export function GalaxyBackground({ section }: Interactive3DBackgroundProps) {
     let lastFallingStarTime = 0
     let lastCursorParticleTime = 0
     let lastFrameTime = 0
-    const targetFPS = 60
+
+    // Adaptive frame rate based on device performance
+    const isMobile = window.innerWidth < 768
+    const isLowEnd = navigator.hardwareConcurrency <= 4 || isMobile
+    const targetFPS = isLowEnd ? 30 : isMobile ? 45 : 60
     const frameInterval = 1000 / targetFPS
 
     // Set canvas size
@@ -130,7 +134,26 @@ export function GalaxyBackground({ section }: Interactive3DBackgroundProps) {
       }
     }
 
-    // Initialize enhanced galaxy with more cosmic effects and three layers
+    // Performance-optimized particle counts based on screen size and device capability
+    const getOptimizedCounts = () => {
+      const screenArea = window.innerWidth * window.innerHeight
+      const isMobile = window.innerWidth < 768
+      const isLowEnd = navigator.hardwareConcurrency <= 4 || isMobile
+
+      // Reduce particle density significantly for better performance
+      const performanceMultiplier = isLowEnd ? 0.3 : isMobile ? 0.5 : 0.7
+
+      return {
+        backgroundStars: Math.floor((screenArea / 8000) * performanceMultiplier), // Much more aggressive reduction
+        middleStars: Math.floor((screenArea / 12000) * performanceMultiplier),
+        foregroundStars: Math.floor((screenArea / 20000) * performanceMultiplier),
+        galaxyParticles: Math.floor((screenArea / 100000) * performanceMultiplier),
+        cosmicDust: Math.floor((screenArea / 50000) * performanceMultiplier),
+        distantGalaxies: Math.max(1, Math.floor((screenArea / 400000) * performanceMultiplier))
+      }
+    }
+
+    // Initialize performance-optimized galaxy
     const initGalaxy = () => {
       stars = []
       backgroundStars = []
@@ -138,40 +161,33 @@ export function GalaxyBackground({ section }: Interactive3DBackgroundProps) {
       galaxyParticles = []
       cosmicDust = []
 
-      // Create three layers of stars for depth - optimized counts
-      // Background layer (far, slow moving, small)
-      const backgroundStarCount = Math.floor((window.innerWidth * window.innerHeight) / 1500) // Reduced from 800
-      for (let i = 0; i < backgroundStarCount; i++) {
+      const counts = getOptimizedCounts()
+
+      // Create three layers of stars for depth - heavily optimized
+      for (let i = 0; i < counts.backgroundStars; i++) {
         backgroundStars.push(createLayeredStar('background'))
       }
 
-      // Middle layer (medium distance, medium movement)
-      const starCount = Math.floor((window.innerWidth * window.innerHeight) / 2000) // Reduced from 1200
-      for (let i = 0; i < starCount; i++) {
+      for (let i = 0; i < counts.middleStars; i++) {
         stars.push(createLayeredStar('middle'))
       }
 
-      // Foreground layer (close, fast moving, larger)
-      const foregroundStarCount = Math.floor((window.innerWidth * window.innerHeight) / 3500) // Reduced from 2000
-      for (let i = 0; i < foregroundStarCount; i++) {
+      for (let i = 0; i < counts.foregroundStars; i++) {
         foregroundStars.push(createLayeredStar('foreground'))
       }
 
-      // Create galaxy spiral particles - optimized
-      const galaxyCount = Math.floor((window.innerWidth * window.innerHeight) / 40000) // Reduced for performance
-      for (let i = 0; i < galaxyCount; i++) {
+      // Create galaxy spiral particles - minimal count
+      for (let i = 0; i < counts.galaxyParticles; i++) {
         galaxyParticles.push(createGalaxyParticle())
       }
 
-      // Create cosmic dust particles - optimized
-      const dustCount = Math.floor((window.innerWidth * window.innerHeight) / 15000) // Reduced for performance
-      for (let i = 0; i < dustCount; i++) {
+      // Create cosmic dust particles - minimal count
+      for (let i = 0; i < counts.cosmicDust; i++) {
         cosmicDust.push(createCosmicDust())
       }
 
-      // Create distant galaxies
-      const distantGalaxyCount = 3
-      for (let i = 0; i < distantGalaxyCount; i++) {
+      // Create distant galaxies - very minimal
+      for (let i = 0; i < counts.distantGalaxies; i++) {
         distantGalaxies.push(createDistantGalaxy())
       }
 

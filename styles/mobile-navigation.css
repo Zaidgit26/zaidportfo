@@ -1,0 +1,174 @@
+/* Mobile Navigation Performance Optimizations */
+
+/* Hardware acceleration for mobile navigation */
+.mobile-nav-open {
+  /* Prevent scrolling when mobile menu is open */
+  overflow: hidden;
+  /* Add hardware acceleration hint */
+  transform: translateZ(0);
+  /* Optimize for animations */
+  will-change: transform;
+}
+
+/* Optimize mobile navigation button */
+.mobile-nav-button {
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  /* Optimize for frequent changes */
+  will-change: transform, opacity, background-color;
+  /* Prevent text selection */
+  user-select: none;
+  /* Optimize touch interactions */
+  touch-action: manipulation;
+  /* Prevent tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+  /* Smooth transitions */
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile menu panel optimizations */
+.mobile-nav-panel {
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  /* Optimize for animations */
+  will-change: transform, opacity;
+  /* Smooth backdrop blur */
+  backdrop-filter: blur(20px);
+  /* Fallback for older browsers */
+  background-color: rgba(0, 0, 0, 0.8);
+  /* Optimize compositing */
+  isolation: isolate;
+}
+
+/* Mobile navigation items */
+.mobile-nav-item {
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  /* Optimize for hover/tap animations */
+  will-change: transform, background-color;
+  /* Prevent text selection */
+  user-select: none;
+  /* Optimize touch interactions */
+  touch-action: manipulation;
+  /* Prevent tap highlight */
+  -webkit-tap-highlight-color: transparent;
+  /* Smooth transitions */
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Active state optimizations */
+.mobile-nav-item:active {
+  transform: scale(0.98) translateZ(0);
+}
+
+/* Backdrop optimizations */
+.mobile-nav-backdrop {
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  /* Optimize for opacity changes */
+  will-change: opacity;
+  /* Smooth backdrop blur */
+  backdrop-filter: blur(8px);
+  /* Optimize touch interactions */
+  touch-action: none;
+}
+
+/* Performance optimizations for low-end devices */
+@media (max-width: 768px) {
+  /* Reduce motion for better performance on mobile */
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-nav-button,
+    .mobile-nav-panel,
+    .mobile-nav-item {
+      transition: none;
+      animation: none;
+    }
+  }
+  
+  /* Optimize for mobile viewport */
+  .mobile-nav-panel {
+    /* Use transform instead of changing position */
+    transform: translateZ(0);
+    /* Optimize for mobile rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Optimize for devices with limited processing power */
+@media (max-width: 480px) {
+  .mobile-nav-backdrop {
+    /* Reduce blur on very small devices */
+    backdrop-filter: blur(4px);
+  }
+  
+  .mobile-nav-panel {
+    /* Reduce blur complexity */
+    backdrop-filter: blur(12px);
+  }
+}
+
+/* High refresh rate display optimizations */
+@media (min-resolution: 120dpi) {
+  .mobile-nav-button,
+  .mobile-nav-panel,
+  .mobile-nav-item {
+    /* Optimize for high DPI displays */
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .mobile-nav-panel {
+    /* Optimize dark mode backdrop */
+    background-color: rgba(0, 0, 0, 0.85);
+  }
+}
+
+/* Accessibility optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-nav-button,
+  .mobile-nav-panel,
+  .mobile-nav-item {
+    /* Remove animations for users who prefer reduced motion */
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Focus optimizations for keyboard navigation */
+.mobile-nav-item:focus-visible {
+  outline: 2px solid rgb(59, 130, 246);
+  outline-offset: 2px;
+}
+
+/* Optimize for touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .mobile-nav-item {
+    /* Increase touch target size */
+    min-height: 48px;
+    /* Optimize for touch interactions */
+    touch-action: manipulation;
+  }
+}
+
+/* Performance hints for browsers */
+.mobile-nav-optimized {
+  /* Hint to browser about upcoming animations */
+  will-change: transform, opacity;
+  /* Force hardware acceleration */
+  transform: translateZ(0);
+  /* Optimize rendering */
+  backface-visibility: hidden;
+  /* Optimize compositing */
+  isolation: isolate;
+}
+
+/* Remove will-change after animations complete */
+.mobile-nav-static {
+  will-change: auto;
+}

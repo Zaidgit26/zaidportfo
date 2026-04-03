@@ -1,47 +1,73 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Poppins, Space_Grotesk } from "next/font/google"
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
-import { BackgroundWrapper } from "@/components/background-wrapper"
-import { CosmicCursor } from "@/components/cosmic-cursor"
+import type { Metadata } from "next";
+import { Cormorant_Garamond, DM_Sans, JetBrains_Mono } from "next/font/google";
+import "./globals.css";
+import { Navigation } from "@/components/navigation";
+import { Cursor } from "@/components/cursor";
+import { PageTransition } from "@/components/page-transition";
 
-const poppins = Poppins({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
-})
+  variable: "--font-display",
+  weight: ["300", "400", "600"],
+  display: "swap",
+  preload: true,
+});
 
-const spaceGrotesk = Space_Grotesk({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-space-grotesk",
-})
+  variable: "--font-ui",
+  weight: ["300", "400", "500"],
+  display: "swap",
+  preload: true,
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400"],
+  display: "swap",
+  preload: true,
+});
 
 export const metadata: Metadata = {
-  title: "Zaid Ahmed S | Portfolio",
-  description: "Front-End Developer | UI/UX Enthusiast | Future Full-Stack Engineer",
-    generator: 'v0.dev'
-}
+  title: "Zaid Khaleel — Software Engineer",
+  description:
+    "Software engineer at Enarxi Innovations. Building GPU pipelines, ML systems, and full-stack applications.",
+  openGraph: {
+    title: "Zaid Khaleel — Software Engineer",
+    description:
+      "GPU-accelerated ML, computer vision, and full-stack engineering.",
+    url: "https://zaidportfo.vercel.app",
+    siteName: "Zaid Khaleel",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Zaid Khaleel — Software Engineer",
+    description:
+      "GPU-accelerated ML, computer vision, and full-stack engineering.",
+  },
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
-      <body className={`${poppins.variable} ${spaceGrotesk.variable} font-sans relative`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-          <BackgroundWrapper />
-          <CosmicCursor />
-          <Navbar />
-          {children}
-          <Footer />
-        </ThemeProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${cormorant.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
+        style={{
+          fontFamily: "var(--font-ui)",
+          backgroundColor: "var(--color-void)",
+          color: "var(--color-text-primary)",
+        }}
+      >
+        <Cursor />
+        <Navigation />
+        <PageTransition>{children}</PageTransition>
       </body>
     </html>
-  )
+  );
 }

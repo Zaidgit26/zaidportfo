@@ -3,6 +3,8 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { FileText, GraduationCap, MapPin, Mail, Briefcase, ChevronRight } from "lucide-react"
 import { motion } from "framer-motion"
+import { EnhancedMotion, StaggerContainer, StaggerItem, HoverAnimation } from "@/components/enhanced-animations"
+import { smoothScrollTo } from "@/components/smooth-scroll-provider"
 
 // Simple Technology Icon Component
 const TechIcon = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
@@ -42,10 +44,10 @@ const TechIcons = {
 
 export function AboutSection() {
   const scrollToContact = () => {
-    const contactSection = document.getElementById('contact');
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    smoothScrollTo('#contact', {
+      offset: -80,
+      duration: 1.2
+    })
   };
   return (
     <section id="about" className="py-24 relative overflow-hidden">

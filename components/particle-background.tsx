@@ -34,10 +34,18 @@ export function ParticleBackground() {
       initParticles()
     }
 
-    // Initialize particles
+    // Initialize particles with performance optimization
     const initParticles = () => {
       particles = []
-      const particleCount = Math.floor((window.innerWidth * window.innerHeight) / 12000)
+
+      // Performance-based particle count reduction
+      const screenArea = window.innerWidth * window.innerHeight
+      const isMobile = window.innerWidth < 768
+      const isLowEnd = navigator.hardwareConcurrency <= 4 || isMobile
+
+      // Much more aggressive reduction for better performance
+      const baseCount = isLowEnd ? 25000 : isMobile ? 20000 : 15000
+      const particleCount = Math.floor(screenArea / baseCount)
 
       // Get primary color from CSS variable
       const primaryRgb = getComputedStyle(document.documentElement).getPropertyValue('--primary-rgb').trim() || '56, 139, 253'
@@ -118,12 +126,27 @@ export function ParticleBackground() {
       }
     }
 
-    // Animation loop with delta time
+    // Animation loop with adaptive frame rate limiting
     let lastTime = performance.now()
+    let lastFrameTime = 0
+
+    // Adaptive frame rate based on device performance
+    const isMobile = window.innerWidth < 768
+    const isLowEnd = navigator.hardwareConcurrency <= 4 || isMobile
+    const targetFPS = isLowEnd ? 30 : isMobile ? 45 : 60
+    const frameInterval = 1000 / targetFPS
+
     const animate = (currentTime: number) => {
+      // Frame rate limiting for better performance
+      if (currentTime - lastFrameTime < frameInterval) {
+        animationFrameId = requestAnimationFrame(animate)
+        return
+      }
+      lastFrameTime = currentTime
+
       const deltaTime = (currentTime - lastTime) / 16.67 // Normalize to ~60 FPS
       lastTime = currentTime
-      
+
       drawParticles(deltaTime)
       animationFrameId = requestAnimationFrame(animate)
     }

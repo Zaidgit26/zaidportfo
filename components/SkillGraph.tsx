@@ -66,14 +66,11 @@ export function SkillGraph() {
       secondRowPositions[1]    // AI
     ]
 
-    // Create positions with minimal randomness to maintain even distribution
+    // Create positions with consistent placement to avoid hydration mismatches
     allPositions.forEach((basePos, i) => {
-      const randomOffsetX = (Math.random() - 0.5) * 15 // ±7.5px horizontal variation
-      const randomOffsetY = (Math.random() - 0.5) * 10 // ±5px vertical variation
-
       positions.push({
-        x: Math.max(margin, Math.min(containerWidth - margin, basePos.x + randomOffsetX)),
-        y: Math.max(160, basePos.y + randomOffsetY),
+        x: Math.max(margin, Math.min(containerWidth - margin, basePos.x)),
+        y: Math.max(160, basePos.y),
         skill: skillsData.skills[i]
       })
     })
