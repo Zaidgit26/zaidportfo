@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValueEvent,
+  useScroll,
+} from "framer-motion";
+import { personal } from "@/data/personal";
 
 const NAV_ITEMS = [
   { label: "Signal", href: "#signal" },
-  { label: "Work", href: "#work" },
+  { label: "Build", href: "#build" },
   { label: "Method", href: "#method" },
-  { label: "Chapter", href: "#chapter" },
+  { label: "Process", href: "#process" },
   { label: "Line", href: "#line" },
 ];
 
@@ -23,7 +29,7 @@ export function Navigation() {
 
   // Track active section with IntersectionObserver
   useEffect(() => {
-    const sectionIds = ["signal", "work", "method", "chapter", "line"];
+    const sectionIds = ["signal", "build", "method", "process", "line"];
     const observers: IntersectionObserver[] = [];
 
     sectionIds.forEach((id) => {
@@ -48,17 +54,14 @@ export function Navigation() {
     };
   }, []);
 
-  const handleNavClick = useCallback(
-    (href: string) => {
-      const id = href.replace("#", "");
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
-      setMobileMenuOpen(false);
-    },
-    []
-  );
+  const handleNavClick = useCallback((href: string) => {
+    const id = href.replace("#", "");
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+    setMobileMenuOpen(false);
+  }, []);
 
   return (
     <>
@@ -77,7 +80,9 @@ export function Navigation() {
         <motion.div
           className="absolute inset-0 -z-10"
           animate={{
-            backgroundColor: scrolled ? "rgba(8,8,8,0.9)" : "rgba(8,8,8,0)",
+            backgroundColor: scrolled
+              ? "rgba(8,8,8,0.9)"
+              : "rgba(8,8,8,0)",
             backdropFilter: scrolled ? "blur(12px)" : "blur(0px)",
           }}
           transition={{ duration: 0.3 }}
@@ -91,9 +96,12 @@ export function Navigation() {
             handleNavClick("#signal");
           }}
           className="font-mono text-[13px] tracking-[0.15em]"
-          style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-mono)" }}
+          style={{
+            color: "var(--color-text-primary)",
+            fontFamily: "var(--font-mono)",
+          }}
         >
-          ZK
+          {personal.monogram}
         </a>
 
         {/* Desktop Nav */}
@@ -120,7 +128,11 @@ export function Navigation() {
                     layoutId="nav-indicator"
                     className="absolute left-[-10px] top-1/2 -translate-y-1/2 w-[2px] h-4"
                     style={{ backgroundColor: "var(--color-accent)" }}
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 350,
+                      damping: 30,
+                    }}
                   />
                 )}
               </button>
@@ -137,13 +149,21 @@ export function Navigation() {
           <motion.span
             className="block h-[1.5px] bg-current"
             style={{ color: "var(--color-text-primary)", width: 24 }}
-            animate={mobileMenuOpen ? { rotate: 45, y: 6.5 } : { rotate: 0, y: 0 }}
+            animate={
+              mobileMenuOpen
+                ? { rotate: 45, y: 6.5 }
+                : { rotate: 0, y: 0 }
+            }
             transition={{ duration: 0.2 }}
           />
           <motion.span
             className="block h-[1.5px] bg-current"
             style={{ color: "var(--color-text-primary)", width: 16 }}
-            animate={mobileMenuOpen ? { rotate: -45, y: -0 } : { rotate: 0, y: 0 }}
+            animate={
+              mobileMenuOpen
+                ? { rotate: -45, y: -0 }
+                : { rotate: 0, y: 0 }
+            }
             transition={{ duration: 0.2 }}
           />
         </button>
@@ -165,7 +185,6 @@ export function Navigation() {
                 <motion.button
                   key={item.href}
                   onClick={() => handleNavClick(item.href)}
-                  className="text-title font-display"
                   style={{
                     fontFamily: "var(--font-display)",
                     fontSize: "var(--text-title)",

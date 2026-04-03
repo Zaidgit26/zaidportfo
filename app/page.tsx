@@ -1,16 +1,16 @@
 import { ActOneSignal } from "@/components/act-one-signal";
-import { ActTwoWork } from "@/components/act-two-work";
+import { ActTwoBuild } from "@/components/act-two-build";
 import { ActThreeMethod } from "@/components/act-three-method";
-import { ActFourChapter } from "@/components/act-four-chapter";
+import { ActFourProcess } from "@/components/act-four-process";
 import { ActFiveLine } from "@/components/act-five-line";
 
 export default function Home() {
   return (
     <main className="relative w-full flex flex-col">
       <ActOneSignal />
-      <ActTwoWork />
+      <ActTwoBuild />
       <ActThreeMethod />
-      <ActFourChapter />
+      <ActFourProcess />
       <ActFiveLine />
     </main>
   );

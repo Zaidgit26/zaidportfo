@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { personal } from "@/data/personal";
+import { SplineScene } from "@/components/spline-scene";
+import { useIsDesktop } from "@/hooks/use-is-desktop";
 
 /* ── Noise Texture (static canvas, generated once) ── */
 function useNoiseTexture() {
@@ -21,7 +24,7 @@ function useNoiseTexture() {
       imageData.data[i] = v;
       imageData.data[i + 1] = v;
       imageData.data[i + 2] = v;
-      imageData.data[i + 3] = 8; // ~3% opacity
+      imageData.data[i + 3] = 8;
     }
     ctx.putImageData(imageData, 0, 0);
     dataUrl.current = canvas.toDataURL("image/png");
@@ -115,9 +118,10 @@ function Typewriter({
 /* ── ACT I — THE SIGNAL ── */
 export function ActOneSignal() {
   const noiseUrl = useNoiseTexture();
+  const isDesktop = useIsDesktop();
 
-  const handleScrollToWork = () => {
-    const el = document.getElementById("work");
+  const handleScrollToBuild = () => {
+    const el = document.getElementById("build");
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -149,6 +153,19 @@ export function ActOneSignal() {
         }}
       />
 
+      {/* Spline 3D scene — desktop only, right half */}
+      {isDesktop && (
+        <div
+          className="absolute top-0 right-0 pointer-events-none"
+          style={{ width: "50%", height: "100%", opacity: 0.7 }}
+        >
+          <SplineScene
+            scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
+            className="w-full h-full"
+          />
+        </div>
+      )}
+
       {/* STEP 1 — Accent line across top */}
       <motion.div
         className="absolute top-0 left-0 h-[1px]"
@@ -163,6 +180,46 @@ export function ActOneSignal() {
         className="relative z-10 flex flex-col justify-start w-full"
         style={{ paddingTop: "40dvh", transform: "translateY(-15%)" }}
       >
+        {/* Availability badge */}
+        <motion.div
+          className="flex items-center gap-3 mb-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              border: "1px solid var(--color-border-strong)",
+              padding: "6px 14px",
+              borderRadius: 100,
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background: "#4A7C59",
+                animation: "pulse 2s ease-in-out infinite",
+              }}
+            />
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 11,
+                letterSpacing: "0.1em",
+                color: "var(--color-text-secondary)",
+              }}
+            >
+              {personal.availability}
+            </span>
+          </div>
+        </motion.div>
+
         {/* STEP 2 — Chapter label */}
         <motion.div
           className="chapter-label mb-6"
@@ -176,7 +233,7 @@ export function ActOneSignal() {
         {/* STEP 3 — Name reveal */}
         <h1 className="overflow-hidden">
           <CharReveal
-            text="Zaid"
+            text={personal.nameDisplay.first}
             startDelay={0.7}
             style={{
               fontFamily: "var(--font-display)",
@@ -189,7 +246,7 @@ export function ActOneSignal() {
           />
           <br />
           <CharReveal
-            text="Khaleel."
+            text={personal.nameDisplay.last}
             startDelay={0.9}
             style={{
               fontFamily: "var(--font-display)",
@@ -206,7 +263,7 @@ export function ActOneSignal() {
         {/* STEP 4 — Role typewriter */}
         <div className="mt-6">
           <Typewriter
-            text="Software Engineer · Enarxi Innovations"
+            text={personal.role}
             startDelay={1400}
             duration={1200}
             style={{
@@ -230,23 +287,10 @@ export function ActOneSignal() {
               fontSize: "var(--text-body)",
               color: "var(--color-text-secondary)",
               lineHeight: "var(--leading-loose)",
+              maxWidth: 540,
             }}
           >
-            Building the full stack — GPU pipelines, ML systems,
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 2.05 }}
-            style={{
-              fontFamily: "var(--font-ui)",
-              fontWeight: 300,
-              fontSize: "var(--text-body)",
-              color: "var(--color-text-secondary)",
-              lineHeight: "var(--leading-loose)",
-            }}
-          >
-            computer vision, and the interfaces that run them.
+            {personal.tagline}
           </motion.p>
         </div>
 
@@ -258,7 +302,7 @@ export function ActOneSignal() {
           transition={{ duration: 0.5, delay: 2.4 }}
         >
           <button
-            onClick={handleScrollToWork}
+            onClick={handleScrollToBuild}
             className="group transition-all duration-200"
             style={{
               padding: "14px 28px",
@@ -279,7 +323,7 @@ export function ActOneSignal() {
               e.currentTarget.style.color = "var(--color-text-secondary)";
             }}
           >
-            View Work ↓
+            See What I Build ↓
           </button>
           <button
             onClick={handleScrollToContact}
@@ -303,7 +347,7 @@ export function ActOneSignal() {
               e.currentTarget.style.color = "var(--color-text-secondary)";
             }}
           >
-            Get in Touch →
+            Work With Me →
           </button>
         </motion.div>
       </div>

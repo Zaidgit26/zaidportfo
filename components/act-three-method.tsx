@@ -1,23 +1,12 @@
 "use client";
 
+import { useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useReveal } from "@/hooks/use-reveal";
 import { fadeUp, lineReveal } from "@/lib/animation-variants";
 
 /* ── Skill Data ── */
 const skillGroups = [
-  {
-    domain: "Machine Learning",
-    skills: [
-      "Python",
-      "PyTorch",
-      "YOLOv8",
-      "OpenCV",
-      "CUDA",
-      "Model Training",
-      "Inference Pipelines",
-    ],
-  },
   {
     domain: "Frontend",
     skills: [
@@ -27,30 +16,49 @@ const skillGroups = [
       "Tailwind CSS",
       "Framer Motion",
       "Material UI",
+      "Figma",
     ],
   },
   {
     domain: "Backend & APIs",
     skills: [
+      "Node.js",
+      "Python",
       "Flask",
       "FastAPI",
       "REST APIs",
       "PostgreSQL",
+      "MongoDB",
       "Redis",
-      "Docker",
+    ],
+  },
+  {
+    domain: "ML & AI",
+    skills: [
+      "PyTorch",
+      "YOLOv8",
+      "OpenCV",
+      "CUDA",
+      "Python ML",
+      "Model Training",
+      "Inference Pipelines",
     ],
   },
   {
     domain: "Mobile",
-    skills: ["React Native", "Expo"],
+    skills: ["React Native", "Expo", "TypeScript"],
   },
   {
-    domain: "Practice",
+    domain: "DevOps & Tools",
+    skills: ["Git", "Docker", "CI/CD", "Linux", "Vercel", "Railway"],
+  },
+  {
+    domain: "AI-Augmented Development",
     skills: [
-      "AI-augmented development",
-      "Solo architecture design",
-      "GPU optimization",
-      "Production deployment",
+      "Cursor",
+      "GitHub Copilot",
+      "Prompt Engineering",
+      "Rapid prototyping",
     ],
   },
 ];
@@ -66,6 +74,37 @@ const statementLines = [
   "",
   "That\u2019s the education.",
 ];
+
+/* ── Spotlight Card ── */
+function SpotlightCard({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    el.style.setProperty("--mouse-x", `${x}%`);
+    el.style.setProperty("--mouse-y", `${y}%`);
+  }, []);
+
+  return (
+    <div
+      ref={cardRef}
+      className={`spotlight-card ${className}`}
+      onMouseMove={handleMouseMove}
+    >
+      {children}
+    </div>
+  );
+}
 
 /* ── ACT III — THE METHOD ── */
 export function ActThreeMethod() {
@@ -157,9 +196,9 @@ export function ActThreeMethod() {
             style={{ marginTop: "var(--space-12)" }}
           >
             {[
-              { value: "9 months", label: "Duration" },
-              { value: "1 engineer", label: "Team size" },
+              { value: "5 services", label: "Offerings" },
               { value: "full stack", label: "Scope" },
+              { value: "AI-augmented", label: "Builds" },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -193,8 +232,8 @@ export function ActThreeMethod() {
           </div>
         </div>
 
-        {/* ── Right: Capability Map ── */}
-        <div ref={skillsRef} className="flex flex-col gap-10">
+        {/* ── Right: Capability Map with Spotlight Cards ── */}
+        <div ref={skillsRef} className="flex flex-col gap-5">
           {skillGroups.map((group, gi) => (
             <motion.div
               key={group.domain}
@@ -203,29 +242,31 @@ export function ActThreeMethod() {
               animate={skillsInView ? "visible" : "hidden"}
               custom={gi}
             >
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 11,
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                  color: "var(--color-accent)",
-                  marginBottom: "var(--space-2)",
-                }}
-              >
-                {group.domain}
-              </div>
-              <p
-                style={{
-                  fontFamily: "var(--font-ui)",
-                  fontWeight: 300,
-                  fontSize: 14,
-                  color: "var(--color-text-secondary)",
-                  lineHeight: "var(--leading-loose)",
-                }}
-              >
-                {group.skills.join(" · ")}
-              </p>
+              <SpotlightCard>
+                <div
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 11,
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    color: "var(--color-accent)",
+                    marginBottom: "var(--space-1)",
+                  }}
+                >
+                  {group.domain}
+                </div>
+                <p
+                  style={{
+                    fontFamily: "var(--font-ui)",
+                    fontWeight: 300,
+                    fontSize: 14,
+                    color: "var(--color-text-secondary)",
+                    lineHeight: "var(--leading-loose)",
+                  }}
+                >
+                  {group.skills.join(" · ")}
+                </p>
+              </SpotlightCard>
             </motion.div>
           ))}
         </div>

@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, DM_Sans, JetBrains_Mono } from "next/font/google";
+import {
+  Cormorant_Garamond,
+  DM_Sans,
+  JetBrains_Mono,
+} from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
 import { Cursor } from "@/components/cursor";
@@ -30,22 +34,22 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Zaid Khaleel — Software Engineer",
+  title: "Zaid Ahmed S — Freelance Full-Stack & AI Engineer",
   description:
-    "Software engineer at Enarxi Innovations. Building GPU pipelines, ML systems, and full-stack applications.",
+    "Freelance engineer based in Chennai. I build web apps, ML systems, mobile apps, and APIs. Available for projects.",
   openGraph: {
-    title: "Zaid Khaleel — Software Engineer",
+    title: "Zaid Ahmed S — Freelance Engineer",
     description:
-      "GPU-accelerated ML, computer vision, and full-stack engineering.",
+      "Full-stack, ML/AI, backend, mobile. Available for freelance projects.",
     url: "https://zaidportfo.vercel.app",
-    siteName: "Zaid Khaleel",
+    siteName: "Zaid Ahmed S",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zaid Khaleel — Software Engineer",
+    title: "Zaid Ahmed S — Freelance Engineer",
     description:
-      "GPU-accelerated ML, computer vision, and full-stack engineering.",
+      "Full-stack, ML/AI, backend, mobile. Available for freelance projects.",
   },
 };
 
