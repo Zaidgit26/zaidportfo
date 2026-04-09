@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState } from "react";
 import { motion } from "framer-motion";
 import { useReveal } from "@/hooks/use-reveal";
 import { fadeUp, lineReveal } from "@/lib/animation-variants";
@@ -9,6 +9,7 @@ import { fadeUp, lineReveal } from "@/lib/animation-variants";
 const skillGroups = [
   {
     domain: "Frontend",
+    icon: "◇",
     skills: [
       "React",
       "Next.js",
@@ -21,6 +22,7 @@ const skillGroups = [
   },
   {
     domain: "Backend & APIs",
+    icon: "⬡",
     skills: [
       "Node.js",
       "Python",
@@ -34,6 +36,7 @@ const skillGroups = [
   },
   {
     domain: "ML & AI",
+    icon: "△",
     skills: [
       "PyTorch",
       "YOLOv8",
@@ -46,14 +49,17 @@ const skillGroups = [
   },
   {
     domain: "Mobile",
+    icon: "○",
     skills: ["React Native", "Expo", "TypeScript"],
   },
   {
     domain: "DevOps & Tools",
+    icon: "⊞",
     skills: ["Git", "Docker", "CI/CD", "Linux", "Vercel", "Railway"],
   },
   {
-    domain: "AI-Augmented Development",
+    domain: "AI-Augmented Dev",
+    icon: "✦",
     skills: [
       "Cursor",
       "GitHub Copilot",
@@ -75,34 +81,84 @@ const statementLines = [
   "That\u2019s the education.",
 ];
 
-/* ── Spotlight Card ── */
-function SpotlightCard({
+/* ── Living Spotlight Card with cursor-tracking glow + gradient border ── */
+function LivingCard({
   children,
-  className = "",
+  index,
 }: {
   children: React.ReactNode;
-  className?: string;
+  index: number;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
+  const [isHovered, setIsHovered] = useState(false);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const el = cardRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    el.style.setProperty("--mouse-x", `${x}%`);
-    el.style.setProperty("--mouse-y", `${y}%`);
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setGlowPos({ x: x * 100, y: y * 100 });
+    setTilt({
+      rx: (y - 0.5) * -6,
+      ry: (x - 0.5) * 6,
+    });
   }, []);
 
+  const { ref, isInView } = useReveal(0.1);
+
   return (
-    <div
-      ref={cardRef}
-      className={`spotlight-card ${className}`}
-      onMouseMove={handleMouseMove}
+    <motion.div
+      ref={ref}
+      variants={fadeUp}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      custom={index}
     >
-      {children}
-    </div>
+      <motion.div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setTilt({ rx: 0, ry: 0 });
+        }}
+        animate={{
+          rotateX: tilt.rx,
+          rotateY: tilt.ry,
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="glass-panel"
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          border: isHovered
+            ? "1px solid rgba(0, 240, 255, 0.3)" // Cyan glow on hover
+            : "1px solid var(--color-border)",
+          borderRadius: 14,
+          padding: "1.5rem",
+          perspective: 800,
+          transformStyle: "preserve-3d",
+          transition: "border-color 300ms ease",
+        }}
+      >
+        {/* Cursor-tracking warm glow */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: `radial-gradient(300px circle at ${glowPos.x}% ${glowPos.y}%, rgba(157, 78, 221, ${isHovered ? 0.15 : 0}), transparent 60%)`,
+            transition: "opacity 300ms ease",
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* Content */}
+        <div style={{ position: "relative", zIndex: 2 }}>{children}</div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -111,7 +167,6 @@ export function ActThreeMethod() {
   const { ref: headerRef, isInView: headerInView } = useReveal(0.3);
   const { ref: stmtRef, isInView: stmtInView } = useReveal(0.15);
   const { ref: statsRef, isInView: statsInView } = useReveal(0.3);
-  const { ref: skillsRef, isInView: skillsInView } = useReveal(0.15);
 
   return (
     <section
@@ -211,8 +266,9 @@ export function ActThreeMethod() {
                   style={{
                     fontFamily: "var(--font-mono)",
                     fontSize: "var(--text-title)",
-                    color: "var(--color-accent)",
+                    color: "var(--color-accent-blue)",
                     lineHeight: "var(--leading-tight)",
+                    textShadow: "0 0 30px rgba(0, 240, 255, 0.4)",
                   }}
                 >
                   {stat.value}
@@ -232,42 +288,55 @@ export function ActThreeMethod() {
           </div>
         </div>
 
-        {/* ── Right: Capability Map with Spotlight Cards ── */}
-        <div ref={skillsRef} className="flex flex-col gap-5">
+        {/* ── Right: Capability Map with Living Cards ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {skillGroups.map((group, gi) => (
-            <motion.div
-              key={group.domain}
-              variants={fadeUp}
-              initial="hidden"
-              animate={skillsInView ? "visible" : "hidden"}
-              custom={gi}
-            >
-              <SpotlightCard>
-                <div
+            <LivingCard key={group.domain} index={gi}>
+              {/* Icon + Domain header */}
+              <div className="flex items-center gap-2 mb-3">
+                <span
+                  style={{
+                    fontSize: 14,
+                    color: "var(--color-accent)",
+                    opacity: 0.7,
+                  }}
+                >
+                  {group.icon}
+                </span>
+                <span
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: 11,
+                    fontSize: 10,
                     letterSpacing: "0.15em",
                     textTransform: "uppercase",
                     color: "var(--color-accent)",
-                    marginBottom: "var(--space-1)",
                   }}
                 >
                   {group.domain}
-                </div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-ui)",
-                    fontWeight: 300,
-                    fontSize: 14,
-                    color: "var(--color-text-secondary)",
-                    lineHeight: "var(--leading-loose)",
-                  }}
-                >
-                  {group.skills.join(" · ")}
-                </p>
-              </SpotlightCard>
-            </motion.div>
+                </span>
+              </div>
+
+              {/* Skill tags */}
+              <div className="flex flex-wrap gap-1.5">
+                {group.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    style={{
+                      fontFamily: "var(--font-ui)",
+                      fontWeight: 300,
+                      fontSize: 12,
+                      color: "var(--color-text-secondary)",
+                      padding: "3px 8px",
+                      borderRadius: 6,
+                      background: "rgba(255, 255, 255, 0.03)",
+                      border: "1px solid rgba(255, 255, 255, 0.04)",
+                    }}
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </LivingCard>
           ))}
         </div>
       </div>

@@ -1,18 +1,148 @@
 "use client";
 
+import { useRef, useCallback, useState } from "react";
 import { motion } from "framer-motion";
 import { useReveal } from "@/hooks/use-reveal";
-import { useIsDesktop } from "@/hooks/use-is-desktop";
-import { SplineScene } from "@/components/spline-scene";
 import { processSteps } from "@/data/process";
 import { fadeUp, lineReveal } from "@/lib/animation-variants";
+
+/* ── Process Step Card with number glow + cursor tracking ── */
+function ProcessCard({
+  step,
+  index,
+}: {
+  step: (typeof processSteps)[0];
+  index: number;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
+  const [isHovered, setIsHovered] = useState(false);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
+  const { ref, isInView } = useReveal(0.1);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setGlowPos({ x: x * 100, y: y * 100 });
+    setTilt({ rx: (y - 0.5) * -8, ry: (x - 0.5) * 8 });
+  }, []);
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={fadeUp}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      custom={index}
+    >
+      <motion.div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setTilt({ rx: 0, ry: 0 });
+        }}
+        animate={{
+          rotateX: tilt.rx,
+          rotateY: tilt.ry,
+          scale: isHovered ? 1.02 : 1,
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="glass-panel"
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          border: isHovered
+            ? "1px solid rgba(0, 240, 255, 0.3)" // Cyan glow on hover
+            : "1px solid var(--color-border)",
+          borderRadius: 16,
+          padding: "2rem",
+          perspective: 1000,
+          transformStyle: "preserve-3d",
+          transition: "border-color 300ms ease",
+        }}
+      >
+        {/* Cursor-tracking gradient */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: `radial-gradient(400px circle at ${glowPos.x}% ${glowPos.y}%, rgba(157, 78, 221, ${isHovered ? 0.15 : 0}), transparent 50%)`,
+            pointerEvents: "none",
+            transition: "opacity 300ms",
+          }}
+        />
+
+        {/* Content */}
+        <div style={{ position: "relative", zIndex: 2 }}>
+          {/* Step number — large, glowing */}
+          <div
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "var(--text-display)",
+              color: "var(--color-accent-blue)",
+              lineHeight: 1,
+              marginBottom: 16,
+              opacity: isHovered ? 1 : 0.6,
+              textShadow: isHovered
+                ? "0 0 40px rgba(0, 240, 255, 0.5)"
+                : "none",
+              transition: "opacity 300ms, text-shadow 300ms",
+            }}
+          >
+            {step.step}
+          </div>
+
+          {/* Accent line */}
+          <div
+            style={{
+              width: isHovered ? "100%" : "30%",
+              height: 1,
+              background:
+                "linear-gradient(90deg, var(--color-accent), transparent)",
+              transition: "width 500ms ease",
+              marginBottom: 16,
+            }}
+          />
+
+          {/* Title */}
+          <h4
+            style={{
+              fontFamily: "var(--font-ui)",
+              fontWeight: 500,
+              fontSize: 18,
+              color: "var(--color-text-primary)",
+              marginBottom: 10,
+            }}
+          >
+            {step.title}
+          </h4>
+
+          {/* Description */}
+          <p
+            style={{
+              fontFamily: "var(--font-ui)",
+              fontWeight: 300,
+              fontSize: 14,
+              color: "var(--color-text-secondary)",
+              lineHeight: "var(--leading-normal)",
+            }}
+          >
+            {step.description}
+          </p>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 /* ── ACT IV — PROCESS ── */
 export function ActFourProcess() {
   const { ref: headerRef, isInView: headerInView } = useReveal(0.3);
-  const { ref: splineRef, isInView: splineInView } = useReveal(0.1);
-  const { ref: cardsRef, isInView: cardsInView } = useReveal(0.1);
-  const isDesktop = useIsDesktop();
 
   return (
     <section
@@ -59,76 +189,10 @@ export function ActFourProcess() {
         />
       </div>
 
-      {/* Spline scene — desktop only */}
-      {isDesktop && (
-        <motion.div
-          ref={splineRef}
-          className="pointer-events-none mb-16"
-          style={{ width: "100%", height: 300 }}
-          variants={fadeUp}
-          initial="hidden"
-          animate={splineInView ? "visible" : "hidden"}
-        >
-          <SplineScene
-            scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
-            className="w-full h-full"
-          />
-        </motion.div>
-      )}
-
-      {/* Process cards */}
-      <div
-        ref={cardsRef}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-      >
+      {/* Process cards — 4 column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {processSteps.map((step, i) => (
-          <motion.div
-            key={step.step}
-            className="service-card flex flex-col"
-            variants={fadeUp}
-            initial="hidden"
-            animate={cardsInView ? "visible" : "hidden"}
-            custom={i}
-          >
-            {/* Step number */}
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "var(--text-title)",
-                color: "var(--color-accent)",
-                lineHeight: "var(--leading-tight)",
-                marginBottom: 12,
-              }}
-            >
-              {step.step}
-            </span>
-
-            {/* Title */}
-            <h4
-              style={{
-                fontFamily: "var(--font-ui)",
-                fontWeight: 500,
-                fontSize: 16,
-                color: "var(--color-text-primary)",
-                marginBottom: 10,
-              }}
-            >
-              {step.title}
-            </h4>
-
-            {/* Description */}
-            <p
-              style={{
-                fontFamily: "var(--font-ui)",
-                fontWeight: 300,
-                fontSize: 14,
-                color: "var(--color-text-secondary)",
-                lineHeight: "var(--leading-normal)",
-              }}
-            >
-              {step.description}
-            </p>
-          </motion.div>
+          <ProcessCard key={step.step} step={step} index={i} />
         ))}
       </div>
     </section>

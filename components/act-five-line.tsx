@@ -40,8 +40,8 @@ export function ActFiveLine() {
         {/* Display text — animated border container */}
         <div className="animated-border inline-block" style={{ padding: 2 }}>
           <div
+            className="glass-panel"
             style={{
-              background: "var(--color-void)",
               borderRadius: 14,
               padding: "var(--space-8)",
             }}
@@ -159,26 +159,16 @@ export function ActFiveLine() {
                 href={personal.resume}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block transition-all duration-200"
+                className="inline-block transition-all duration-300 glass-button"
                 style={{
                   padding: "14px 28px",
-                  border: "1px solid var(--color-border-strong)",
-                  background: "transparent",
+                  borderRadius: "8px",
                   fontFamily: "var(--font-ui)",
                   fontWeight: 300,
                   fontSize: 13,
                   letterSpacing: "0.1em",
-                  color: "var(--color-text-secondary)",
+                  color: "var(--color-text-primary)",
                   textDecoration: "none",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "var(--color-accent)";
-                  e.currentTarget.style.color = "var(--color-text-primary)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor =
-                    "var(--color-border-strong)";
-                  e.currentTarget.style.color = "var(--color-text-secondary)";
                 }}
               >
                 Download Resume ↗

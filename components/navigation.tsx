@@ -81,8 +81,8 @@ export function Navigation() {
           className="absolute inset-0 -z-10"
           animate={{
             backgroundColor: scrolled
-              ? "rgba(8,8,8,0.9)"
-              : "rgba(8,8,8,0)",
+              ? "rgba(10, 5, 20, 0.8)" /* Dark purple pitch black glass */
+              : "rgba(10, 5, 20, 0)",
             backdropFilter: scrolled ? "blur(12px)" : "blur(0px)",
           }}
           transition={{ duration: 0.3 }}

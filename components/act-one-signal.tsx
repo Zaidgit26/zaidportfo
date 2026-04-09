@@ -1,10 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { personal } from "@/data/personal";
-import { SplineScene } from "@/components/spline-scene";
-import { useIsDesktop } from "@/hooks/use-is-desktop";
+
+/* ── Lazy-load the Pong game background (no SSR) ── */
+const AnimatedHeroBackground = dynamic(
+  () =>
+    import("@/components/ui/animated-hero-section").then(
+      (mod) => mod.AnimatedHeroBackground
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div style={{ width: "100%", height: "100%", background: "transparent" }} />
+    ),
+  }
+);
 
 /* ── Noise Texture (static canvas, generated once) ── */
 function useNoiseTexture() {
@@ -36,17 +49,15 @@ function useNoiseTexture() {
 /* ── Character-by-character text reveal ── */
 function CharReveal({
   text,
-  className,
   style,
   startDelay = 0,
 }: {
   text: string;
-  className?: string;
   style?: React.CSSProperties;
   startDelay?: number;
 }) {
   return (
-    <span className={className} style={{ display: "inline-block", ...style }}>
+    <span style={{ display: "inline-block", ...style }}>
       {text.split("").map((char, i) => (
         <motion.span
           key={i}
@@ -71,13 +82,11 @@ function Typewriter({
   text,
   startDelay = 0,
   duration = 1200,
-  className,
   style,
 }: {
   text: string;
   startDelay?: number;
   duration?: number;
-  className?: string;
   style?: React.CSSProperties;
 }) {
   const [displayed, setDisplayed] = useState("");
@@ -100,12 +109,16 @@ function Typewriter({
   }, [text, startDelay, duration]);
 
   return (
-    <span className={className} style={style}>
+    <span style={style}>
       {displayed}
       {showCursor && (
         <motion.span
           animate={{ opacity: [1, 0] }}
-          transition={{ duration: 0.6, repeat: Infinity, repeatType: "reverse" }}
+          transition={{
+            duration: 0.6,
+            repeat: Infinity,
+            repeatType: "reverse",
+          }}
           style={{ color: "var(--color-accent)" }}
         >
           |
@@ -115,20 +128,98 @@ function Typewriter({
   );
 }
 
+/* ── Magnetic CTA Button ── */
+function MagneticButton({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const el = btnRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const dx = (e.clientX - centerX) * 0.3;
+    const dy = (e.clientY - centerY) * 0.3;
+    setOffset({ x: dx, y: dy });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setOffset({ x: 0, y: 0 });
+  }, []);
+
+  return (
+    <motion.button
+      ref={btnRef}
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      animate={{ x: offset.x, y: offset.y }}
+      transition={{ type: "spring", stiffness: 300, damping: 20, mass: 0.5 }}
+      className="group transition-colors duration-300 glass-button"
+      style={{
+        padding: "14px 28px",
+        border: "1px solid var(--color-border-strong)",
+        background: "transparent",
+        fontFamily: "var(--font-ui)",
+        fontWeight: 300,
+        fontSize: 13,
+        letterSpacing: "0.1em",
+        color: "var(--color-text-primary)", // Ensure text is visible on glass
+        borderRadius: "8px", // Added border radius
+      }}
+    >
+      {children}
+    </motion.button>
+  );
+}
+
+/* ── Smooth scroll with custom elastic easing ── */
+function elasticScrollTo(targetId: string) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+
+  const start = window.scrollY;
+  const end = el.getBoundingClientRect().top + start;
+  const distance = end - start;
+  const duration = 1200;
+  let startTime: number | null = null;
+
+  function elasticOut(t: number): number {
+    if (t === 0 || t === 1) return t;
+    const p = 0.4;
+    return (
+      Math.pow(2, -10 * t) *
+        Math.sin(((t - p / 4) * (2 * Math.PI)) / p) +
+      1
+    );
+  }
+
+  function step(timestamp: number) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = elasticOut(progress);
+
+    window.scrollTo(0, start + distance * eased);
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
 /* ── ACT I — THE SIGNAL ── */
 export function ActOneSignal() {
   const noiseUrl = useNoiseTexture();
-  const isDesktop = useIsDesktop();
-
-  const handleScrollToBuild = () => {
-    const el = document.getElementById("build");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleScrollToContact = () => {
-    const el = document.getElementById("line");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <section
@@ -153,20 +244,12 @@ export function ActOneSignal() {
         }}
       />
 
-      {/* Spline 3D scene — desktop only, right half */}
-      {isDesktop && (
-        <div
-          className="absolute top-0 right-0 pointer-events-none"
-          style={{ width: "50%", height: "100%", opacity: 0.7 }}
-        >
-          <SplineScene
-            scene="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
-            className="w-full h-full"
-          />
-        </div>
-      )}
+      {/* ── Interactive Pong Game Background ── */}
+      <div className="absolute inset-0 pointer-events-none">
+        <AnimatedHeroBackground />
+      </div>
 
-      {/* STEP 1 — Accent line across top */}
+      {/* Accent line across top */}
       <motion.div
         className="absolute top-0 left-0 h-[1px]"
         style={{ backgroundColor: "var(--color-accent)" }}
@@ -175,7 +258,7 @@ export function ActOneSignal() {
         transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
       />
 
-      {/* Main content — 40% from top offset */}
+      {/* Main content */}
       <div
         className="relative z-10 flex flex-col justify-start w-full"
         style={{ paddingTop: "40dvh", transform: "translateY(-15%)" }}
@@ -220,7 +303,7 @@ export function ActOneSignal() {
           </div>
         </motion.div>
 
-        {/* STEP 2 — Chapter label */}
+        {/* Chapter label */}
         <motion.div
           className="chapter-label mb-6"
           initial={{ opacity: 0 }}
@@ -230,7 +313,7 @@ export function ActOneSignal() {
           001 / Signal
         </motion.div>
 
-        {/* STEP 3 — Name reveal */}
+        {/* Name reveal */}
         <h1 className="overflow-hidden">
           <CharReveal
             text={personal.nameDisplay.first}
@@ -260,7 +343,7 @@ export function ActOneSignal() {
           />
         </h1>
 
-        {/* STEP 4 — Role typewriter */}
+        {/* Role typewriter */}
         <div className="mt-6">
           <Typewriter
             text={personal.role}
@@ -275,7 +358,7 @@ export function ActOneSignal() {
           />
         </div>
 
-        {/* STEP 5 — Sub-description */}
+        {/* Sub-description */}
         <div className="mt-8 flex flex-col gap-1">
           <motion.p
             initial={{ opacity: 0 }}
@@ -294,65 +377,23 @@ export function ActOneSignal() {
           </motion.p>
         </div>
 
-        {/* STEP 6 — CTA buttons */}
+        {/* Magnetic CTA buttons */}
         <motion.div
           className="flex flex-col sm:flex-row gap-4 mt-10"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 2.4 }}
         >
-          <button
-            onClick={handleScrollToBuild}
-            className="group transition-all duration-200"
-            style={{
-              padding: "14px 28px",
-              border: "1px solid var(--color-border-strong)",
-              background: "transparent",
-              fontFamily: "var(--font-ui)",
-              fontWeight: 300,
-              fontSize: 13,
-              letterSpacing: "0.1em",
-              color: "var(--color-text-secondary)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "var(--color-accent)";
-              e.currentTarget.style.color = "var(--color-text-primary)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "var(--color-border-strong)";
-              e.currentTarget.style.color = "var(--color-text-secondary)";
-            }}
-          >
+          <MagneticButton onClick={() => elasticScrollTo("build")}>
             See What I Build ↓
-          </button>
-          <button
-            onClick={handleScrollToContact}
-            className="group transition-all duration-200"
-            style={{
-              padding: "14px 28px",
-              border: "1px solid var(--color-border-strong)",
-              background: "transparent",
-              fontFamily: "var(--font-ui)",
-              fontWeight: 300,
-              fontSize: 13,
-              letterSpacing: "0.1em",
-              color: "var(--color-text-secondary)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "var(--color-accent)";
-              e.currentTarget.style.color = "var(--color-text-primary)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "var(--color-border-strong)";
-              e.currentTarget.style.color = "var(--color-text-secondary)";
-            }}
-          >
+          </MagneticButton>
+          <MagneticButton onClick={() => elasticScrollTo("line")}>
             Work With Me →
-          </button>
+          </MagneticButton>
         </motion.div>
       </div>
 
-      {/* STEP 7 — Scroll indicator (desktop only) */}
+      {/* Scroll indicator (desktop only) */}
       <div className="absolute bottom-8 right-[var(--content-padding)] hidden md:flex flex-col items-center gap-3">
         <motion.span
           initial={{ opacity: 0 }}
@@ -381,7 +422,11 @@ export function ActOneSignal() {
               backgroundColor: "var(--color-text-muted)",
             }}
             animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           />
         </motion.div>
       </div>
